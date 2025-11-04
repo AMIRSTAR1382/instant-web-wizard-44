@@ -10,7 +10,7 @@ interface CommunityCardProps {
 export const CommunityCard = ({ title, description, image, className }: CommunityCardProps) => {
   return (
     <div className={cn(
-      "group relative rounded-2xl overflow-hidden bg-gradient-secondary shadow-card hover:shadow-glow transition-all duration-300 cursor-pointer",
+      "group relative rounded-2xl overflow-hidden bg-gradient-secondary shadow-card hover:shadow-glow transition-all duration-300 cursor-pointer hover:scale-105 hover:-translate-y-1 animate-fade-in",
       className
     )}>
       <div className="aspect-square w-full overflow-hidden">

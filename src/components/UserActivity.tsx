@@ -15,7 +15,7 @@ const recentActivity = [
 
 export const UserActivity = () => {
   return (
-    <aside className="fixed right-0 top-0 h-screen w-80 bg-sidebar border-l border-sidebar-border p-6 overflow-y-auto">
+    <aside className="w-80 bg-card border-l border-border p-6 overflow-y-auto hidden xl:block">
       <div className="flex items-center justify-between mb-8">
         <div className="w-10 h-10 rounded-full bg-card" />
         <div className="flex gap-3">
@@ -30,11 +30,11 @@ export const UserActivity = () => {
 
       <div className="mb-8">
         <div className="w-24 h-24 mx-auto mb-4 relative">
-          <div className="absolute inset-0 bg-gradient-accent rounded-2xl blur-xl opacity-50" />
+          <div className="absolute inset-0 bg-gradient-accent rounded-full blur-xl opacity-50 animate-pulse" />
           <img 
             src={userAvatar} 
             alt="User Avatar"
-            className="relative w-full h-full object-cover rounded-2xl shadow-glow"
+            className="relative w-full h-full object-cover rounded-full shadow-glow border-2 border-primary/20"
           />
         </div>
         <h2 className="text-center text-xl font-bold">Md Amir Khan</h2>
@@ -50,8 +50,8 @@ export const UserActivity = () => {
         </div>
         <div className="space-y-3">
           {newMembers.map((member) => (
-            <div key={member.name} className="flex items-center gap-3 group cursor-pointer">
-              <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-lg group-hover:scale-110 transition-transform">
+            <div key={member.name} className="flex items-center gap-3 group cursor-pointer animate-fade-in hover:translate-x-1 transition-all">
+              <div className="w-10 h-10 rounded-full bg-gradient-primary flex items-center justify-center text-lg group-hover:scale-110 transition-transform border border-primary/30">
                 {member.avatar}
               </div>
               <div className="flex-1 min-w-0">
@@ -72,8 +72,8 @@ export const UserActivity = () => {
         </div>
         <div className="space-y-3">
           {recentActivity.map((activity) => (
-            <div key={activity.name} className="flex items-center gap-3 group cursor-pointer">
-              <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-sm font-bold group-hover:scale-110 transition-transform">
+            <div key={activity.name} className="flex items-center gap-3 group cursor-pointer animate-fade-in hover:translate-x-1 transition-all">
+              <div className="w-10 h-10 rounded-full bg-gradient-accent flex items-center justify-center text-sm font-bold group-hover:scale-110 transition-transform border border-accent/30">
                 {activity.name[0]}
               </div>
               <div className="flex-1 min-w-0">
