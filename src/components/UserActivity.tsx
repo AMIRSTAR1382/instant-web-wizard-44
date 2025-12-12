@@ -63,8 +63,7 @@ export const UserActivity = ({ isOpen = false, onClose }: UserActivityProps) => 
         >
           <X className="w-4 h-4" />
         </button>
-      {/* Main Content */}
-      {/* Main Content */}
+        {/* Main Content */}
       <div 
         className={`absolute inset-0 p-6 overflow-y-auto transition-transform duration-300 ease-out ${
           activePanel !== "main" ? "-translate-x-full" : "translate-x-0"
