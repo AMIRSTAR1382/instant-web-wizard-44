@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { Home, Gamepad2, Music, Film, Code, Cpu, Settings, Headphones, Users, ChevronUp, ChevronDown } from "lucide-react";
+import { Home, Gamepad2, Music, Film, Code, Cpu, Settings, Headphones, Users } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import {
   Sidebar,
@@ -22,7 +21,6 @@ const navItems = [
 
 export const AppSidebar = () => {
   const { open } = useSidebar();
-  const [soundBarOpen, setSoundBarOpen] = useState(true);
 
   return (
     <Sidebar collapsible="icon" className="border-r-0 md:!left-[72px]">
@@ -64,47 +62,38 @@ export const AppSidebar = () => {
           </SidebarMenu>
         </div>
 
-        {/* Sound Bar Section */}
-        <div className="border-t border-sidebar-border">
-          {open && (
-            <button 
-              onClick={() => setSoundBarOpen(!soundBarOpen)}
-              className="w-full flex items-center justify-between px-4 py-3 text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <div className="flex items-center gap-2">
-                <div className="flex items-end gap-0.5 h-4">
-                  {[1, 2, 3, 4, 5].map((i) => (
-                    <div
-                      key={i}
-                      className="w-0.5 bg-primary rounded-full animate-voice-bar"
-                      style={{
-                        animationDelay: `${i * 0.1}s`,
-                        height: '100%',
-                      }}
-                    />
-                  ))}
-                </div>
-                <span className="text-sm">Voice Active</span>
-              </div>
-              {soundBarOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
-            </button>
-          )}
-          {!open && (
-            <div className="flex justify-center py-3">
-              <div className="flex items-end gap-0.5 h-4">
-                {[1, 2, 3].map((i) => (
-                  <div
-                    key={i}
-                    className="w-0.5 bg-primary rounded-full animate-voice-bar"
-                    style={{
-                      animationDelay: `${i * 0.1}s`,
-                      height: '100%',
-                    }}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
+        {/* Sound Bar Section - Colorful Equalizer */}
+        <div className="border-t border-sidebar-border px-4 py-4">
+          <div className="flex items-end justify-center gap-[2px] h-10">
+            {[
+              { color: '#9333ea', delay: 0.0 },
+              { color: '#a855f7', delay: 0.1 },
+              { color: '#c084fc', delay: 0.15 },
+              { color: '#e879f9', delay: 0.2 },
+              { color: '#f472b6', delay: 0.25 },
+              { color: '#fb7185', delay: 0.3 },
+              { color: '#f97316', delay: 0.35 },
+              { color: '#facc15', delay: 0.4 },
+              { color: '#a3e635', delay: 0.45 },
+              { color: '#4ade80', delay: 0.5 },
+              { color: '#2dd4bf', delay: 0.55 },
+              { color: '#22d3ee', delay: 0.6 },
+              { color: '#38bdf8', delay: 0.65 },
+              { color: '#60a5fa', delay: 0.7 },
+              { color: '#818cf8', delay: 0.75 },
+              { color: '#a78bfa', delay: 0.8 },
+            ].map((bar, i) => (
+              <div
+                key={i}
+                className="w-1 rounded-full animate-voice-bar"
+                style={{
+                  backgroundColor: bar.color,
+                  animationDelay: `${bar.delay}s`,
+                  height: '100%',
+                }}
+              />
+            ))}
+          </div>
         </div>
 
         {/* User Profile Section */}
