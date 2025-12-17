@@ -1,4 +1,5 @@
-import { Home, Gamepad2, Music, Film, Code, Cpu, Settings, Headphones, Users } from "lucide-react";
+import { useState } from "react";
+import { Home, Gamepad2, Music, Film, Code, Cpu, Settings, Headphones, Users, ChevronUp, ChevronDown } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import {
   Sidebar,
@@ -21,6 +22,7 @@ const navItems = [
 
 export const AppSidebar = () => {
   const { open } = useSidebar();
+  const [soundBarOpen, setSoundBarOpen] = useState(true);
 
   return (
     <Sidebar collapsible="icon" className="border-r-0 md:!left-[72px]">
@@ -62,10 +64,53 @@ export const AppSidebar = () => {
           </SidebarMenu>
         </div>
 
+        {/* Sound Bar Section */}
+        <div className="border-t border-sidebar-border">
+          {open && (
+            <button 
+              onClick={() => setSoundBarOpen(!soundBarOpen)}
+              className="w-full flex items-center justify-between px-4 py-3 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <div className="flex items-center gap-2">
+                <div className="flex items-end gap-0.5 h-4">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <div
+                      key={i}
+                      className="w-0.5 bg-primary rounded-full animate-voice-bar"
+                      style={{
+                        animationDelay: `${i * 0.1}s`,
+                        height: '100%',
+                      }}
+                    />
+                  ))}
+                </div>
+                <span className="text-sm">Voice Active</span>
+              </div>
+              {soundBarOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
+            </button>
+          )}
+          {!open && (
+            <div className="flex justify-center py-3">
+              <div className="flex items-end gap-0.5 h-4">
+                {[1, 2, 3].map((i) => (
+                  <div
+                    key={i}
+                    className="w-0.5 bg-primary rounded-full animate-voice-bar"
+                    style={{
+                      animationDelay: `${i * 0.1}s`,
+                      height: '100%',
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* User Profile Section */}
-        <div className="mt-auto border-t border-sidebar-border p-3">
-          <div className="flex items-center gap-3">
-            <div className="relative">
+        <div className="border-t border-sidebar-border p-3">
+          <div className={`flex items-center ${open ? 'gap-3' : 'justify-center'}`}>
+            <div className="relative shrink-0">
               <img
                 src={userAvatar}
                 alt="User avatar"

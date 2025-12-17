@@ -39,18 +39,5 @@ export const ServerIconsBar = () => (
       <Plus className="w-6 h-6 text-primary group-hover:text-primary" />
     </div>
     
-    {/* Voice Animation at Bottom */}
-    <div className="mt-auto flex items-end gap-0.5 h-8">
-      {[1, 2, 3, 4, 5].map((i) => (
-        <div
-          key={i}
-          className="w-1 bg-primary rounded-full animate-voice-bar"
-          style={{
-            animationDelay: `${i * 0.1}s`,
-            height: '100%',
-          }}
-        />
-      ))}
-    </div>
   </div>
 );
