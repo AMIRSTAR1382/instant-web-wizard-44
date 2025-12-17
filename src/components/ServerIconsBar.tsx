@@ -10,7 +10,7 @@ const serverIcons = [
 ];
 
 export const ServerIconsBar = () => (
-  <div className="relative w-[72px] min-w-[72px] h-svh bg-sidebar-background flex-col items-center py-3 gap-2 hidden md:flex fixed left-0 top-0 z-20">
+  <div className="w-[72px] min-w-[72px] h-svh bg-sidebar-background flex-col items-center py-3 gap-2 border-r border-sidebar-border hidden md:flex fixed left-0 top-0 z-20">
     {/* Main Server Icon */}
     <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center mb-2 hover:bg-primary/30 transition-colors cursor-pointer">
       <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
@@ -38,15 +38,6 @@ export const ServerIconsBar = () => (
     <div className="w-12 h-12 rounded-full bg-sidebar-accent flex items-center justify-center hover:bg-primary/20 hover:rounded-2xl transition-all duration-200 cursor-pointer group">
       <Plus className="w-6 h-6 text-primary group-hover:text-primary" />
     </div>
-
-    {/* Curved Edge */}
-    <div className="absolute right-0 top-0 h-full w-6 overflow-hidden pointer-events-none">
-      <svg className="absolute right-0 top-0 h-full" width="24" height="100%" preserveAspectRatio="none" viewBox="0 0 24 100">
-        <path 
-          d="M0,0 L24,0 L24,100 L0,100 C12,85 12,65 0,50 C12,35 12,15 0,0 Z" 
-          className="fill-background"
-        />
-      </svg>
-    </div>
+    
   </div>
 );
