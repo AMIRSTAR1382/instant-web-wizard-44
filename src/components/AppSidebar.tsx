@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Home, Gamepad2, Music, Film, Code, Cpu, Settings, Headphones, Users, ChevronUp, ChevronDown } from "lucide-react";
+import { Home, Gamepad2, Music, Film, Code, Cpu, Settings, Headphones, Users, ChevronUp, ChevronDown, MicOff } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import {
   Sidebar,
@@ -23,6 +23,7 @@ const navItems = [
 export const AppSidebar = () => {
   const { open } = useSidebar();
   const [soundBarOpen, setSoundBarOpen] = useState(true);
+  const [voiceActive, setVoiceActive] = useState(true);
 
   return (
     <Sidebar collapsible="icon" className="border-r-0 md:!left-[72px]">
@@ -67,13 +68,50 @@ export const AppSidebar = () => {
         {/* Sound Bar Section */}
         <div className="border-t border-sidebar-border">
           {open && (
+            <div className="flex items-center justify-between px-4 py-3">
+              <button 
+                onClick={() => setSoundBarOpen(!soundBarOpen)}
+                className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {voiceActive ? (
+                  <div className="flex items-end gap-0.5 h-4">
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <div
+                        key={i}
+                        className="w-0.5 bg-primary rounded-full animate-voice-bar"
+                        style={{
+                          animationDelay: `${i * 0.1}s`,
+                          height: '100%',
+                        }}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <MicOff className="w-4 h-4 text-muted-foreground" />
+                )}
+                <span className="text-sm">{voiceActive ? 'Voice Active' : 'Voice Muted'}</span>
+                {soundBarOpen ? <ChevronDown className="w-4 h-4 ml-1" /> : <ChevronUp className="w-4 h-4 ml-1" />}
+              </button>
+              <button
+                onClick={() => setVoiceActive(!voiceActive)}
+                className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                  voiceActive 
+                    ? 'bg-primary/20 text-primary hover:bg-primary/30' 
+                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                }`}
+              >
+                {voiceActive ? 'On' : 'Off'}
+              </button>
+            </div>
+          )}
+          {!open && (
             <button 
-              onClick={() => setSoundBarOpen(!soundBarOpen)}
-              className="w-full flex items-center justify-between px-4 py-3 text-muted-foreground hover:text-foreground transition-colors"
+              onClick={() => setVoiceActive(!voiceActive)}
+              className="w-full flex justify-center py-3 hover:bg-sidebar-accent transition-colors"
             >
-              <div className="flex items-center gap-2">
+              {voiceActive ? (
                 <div className="flex items-end gap-0.5 h-4">
-                  {[1, 2, 3, 4, 5].map((i) => (
+                  {[1, 2, 3].map((i) => (
                     <div
                       key={i}
                       className="w-0.5 bg-primary rounded-full animate-voice-bar"
@@ -84,26 +122,10 @@ export const AppSidebar = () => {
                     />
                   ))}
                 </div>
-                <span className="text-sm">Voice Active</span>
-              </div>
-              {soundBarOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
+              ) : (
+                <MicOff className="w-4 h-4 text-muted-foreground" />
+              )}
             </button>
-          )}
-          {!open && (
-            <div className="flex justify-center py-3">
-              <div className="flex items-end gap-0.5 h-4">
-                {[1, 2, 3].map((i) => (
-                  <div
-                    key={i}
-                    className="w-0.5 bg-primary rounded-full animate-voice-bar"
-                    style={{
-                      animationDelay: `${i * 0.1}s`,
-                      height: '100%',
-                    }}
-                  />
-                ))}
-              </div>
-            </div>
           )}
         </div>
 
