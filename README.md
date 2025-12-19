@@ -2,17 +2,12 @@
 
 ## Project info
 
-**URL**: https://lovable.dev/projects/59b8385d-7bfe-4895-9b07-9f3160468699
+  This is my own project for a web or web app like discord whit new design and diferents this project is a idea for iranian companys and gamers and all developers 
+   if someone want to use it its open but take a hand to me for work with nxt gen of web and web app we need work on it together and make our company 🤝😉
 
 ## How can I edit this code?
 
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/59b8385d-7bfe-4895-9b07-9f3160468699) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
+copy the clone and use on your code editor
 
 **Use your preferred IDE**
 
@@ -60,14 +55,4 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
-## How can I deploy this project?
 
-Simply open [Lovable](https://lovable.dev/projects/59b8385d-7bfe-4895-9b07-9f3160468699) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
