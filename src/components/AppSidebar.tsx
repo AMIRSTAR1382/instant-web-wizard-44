@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Home, Gamepad2, Music, Film, Code, Cpu, Settings, Headphones, Users, ChevronUp, ChevronDown, MicOff } from "lucide-react";
+import { Home, Gamepad2, Music, Film, Code, Cpu, Settings, Headphones, Users, ChevronUp, ChevronDown, MicOff, Mic } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import {
   Sidebar,
@@ -20,13 +20,22 @@ const navItems = [
   { icon: Cpu, label: "Technology", path: "/technology" },
 ];
 
+const voiceParticipants = [
+  { id: 1, name: "Alex", avatar: "https://i.pravatar.cc/150?img=1", isSpeaking: true, isMuted: false },
+  { id: 2, name: "Sarah", avatar: "https://i.pravatar.cc/150?img=2", isSpeaking: false, isMuted: false },
+  { id: 3, name: "Mike", avatar: "https://i.pravatar.cc/150?img=3", isSpeaking: false, isMuted: true },
+];
+
 export const AppSidebar = () => {
   const { open } = useSidebar();
   const [soundBarOpen, setSoundBarOpen] = useState(true);
   const [voiceActive, setVoiceActive] = useState(true);
 
   return (
-    <Sidebar collapsible="icon" className="border-r-0 md:!left-[72px]">
+    <Sidebar
+      collapsible="offcanvas"
+      className="border-r-0 md:left-[72px] md:group-data-[collapsible=offcanvas]:left-[calc((var(--sidebar-width)+72px)*-1)]"
+    >
       <SidebarContent className="flex flex-col h-full">
         {/* Header */}
         <div className="px-4 py-4">
@@ -71,7 +80,7 @@ export const AppSidebar = () => {
             <div className="flex items-center justify-between px-4 py-3">
               <button 
                 onClick={() => setSoundBarOpen(!soundBarOpen)}
-                className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+                className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
               >
                 {voiceActive ? (
                   <div className="flex items-end gap-0.5 h-4">
@@ -126,6 +135,34 @@ export const AppSidebar = () => {
                 <MicOff className="w-4 h-4 text-muted-foreground" />
               )}
             </button>
+          )}
+          {open && soundBarOpen && voiceActive && (
+            <div className="px-4 pb-3 space-y-2">
+              <p className="text-xs text-muted-foreground mb-2">In this room</p>
+              {voiceParticipants.map((participant) => (
+                <div 
+                  key={participant.id}
+                  className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-sidebar-accent transition-colors"
+                >
+                  <div className="relative">
+                    <img 
+                      src={participant.avatar} 
+                      alt={participant.name}
+                      className={`w-7 h-7 rounded-full object-cover ${participant.isSpeaking ? 'ring-2 ring-primary' : ''}`}
+                    />
+                    {participant.isSpeaking && (
+                      <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-primary rounded-full border border-sidebar-background" />
+                    )}
+                  </div>
+                  <span className="text-sm text-foreground flex-1">{participant.name}</span>
+                  {participant.isMuted ? (
+                    <MicOff className="w-3.5 h-3.5 text-muted-foreground" />
+                  ) : (
+                    <Mic className="w-3.5 h-3.5 text-muted-foreground" />
+                  )}
+                </div>
+              ))}
+            </div>
           )}
         </div>
 
