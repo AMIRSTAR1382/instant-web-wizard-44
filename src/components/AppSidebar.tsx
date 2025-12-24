@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Home, Gamepad2, Music, Film, Code, Cpu, Settings, Headphones, Users, ChevronUp, ChevronDown, MicOff, Mic } from "lucide-react";
+import { Home, Gamepad2, Music, Film, Code, Cpu, Settings, Headphones, HeadphoneOff, Users, ChevronUp, ChevronDown, MicOff, Mic } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import {
   Sidebar,
@@ -99,17 +99,7 @@ export const AppSidebar = () => {
                   <MicOff className="w-4 h-4 text-muted-foreground" />
                 )}
                 <span className="text-sm">{voiceActive ? 'Voice Active' : 'Voice Muted'}</span>
-                {soundBarOpen ? <ChevronDown className="w-4 h-4 ml-1" /> : <ChevronUp className="w-4 h-4 ml-1" />}
-              </button>
-              <button
-                onClick={() => setVoiceActive(!voiceActive)}
-                className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-                  voiceActive 
-                    ? 'bg-primary/20 text-primary hover:bg-primary/30' 
-                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                }`}
-              >
-                {voiceActive ? 'On' : 'Off'}
+                
               </button>
             </div>
           )}
@@ -136,7 +126,7 @@ export const AppSidebar = () => {
               )}
             </button>
           )}
-          {open && soundBarOpen && voiceActive && (
+          {open && soundBarOpen && (
             <div className="px-4 pb-3 space-y-2">
               <p className="text-xs text-muted-foreground mb-2">In this room</p>
               {voiceParticipants.map((participant) => (
@@ -186,10 +176,26 @@ export const AppSidebar = () => {
                   <button className="p-1.5 rounded-md hover:bg-sidebar-accent transition-colors text-muted-foreground hover:text-foreground">
                     <Settings className="w-4 h-4" />
                   </button>
-                  <button className="p-1.5 rounded-md hover:bg-sidebar-accent transition-colors text-muted-foreground hover:text-foreground">
-                    <Headphones className="w-4 h-4" />
+                  <button 
+                    onClick={() => setVoiceActive(!voiceActive)}
+                    className={`p-1.5 rounded-md transition-colors ${
+                      voiceActive 
+                        ? 'bg-primary/20 text-primary hover:bg-primary/30' 
+                        : 'hover:bg-sidebar-accent text-muted-foreground hover:text-foreground'
+                    }`}
+                    title={voiceActive ? 'Disconnect Voice' : 'Connect Voice'}
+                  >
+                    {voiceActive ? <Headphones className="w-4 h-4" /> : <HeadphoneOff className="w-4 h-4" />}
                   </button>
-                  <button className="p-1.5 rounded-md hover:bg-sidebar-accent transition-colors text-muted-foreground hover:text-foreground">
+                  <button 
+                    onClick={() => setSoundBarOpen(!soundBarOpen)}
+                    className={`p-1.5 rounded-md transition-colors ${
+                      soundBarOpen && voiceActive
+                        ? 'bg-primary/20 text-primary hover:bg-primary/30' 
+                        : 'hover:bg-sidebar-accent text-muted-foreground hover:text-foreground'
+                    }`}
+                    title={soundBarOpen ? 'Hide Participants' : 'Show Participants'}
+                  >
                     <Users className="w-4 h-4" />
                   </button>
                 </div>
