@@ -173,9 +173,6 @@ export const AppSidebar = () => {
                   <p className="text-sm font-medium text-foreground truncate">aamiiiiiiiirrr</p>
                 </div>
                 <div className="flex items-center gap-1">
-                  <button className="p-1.5 rounded-md hover:bg-sidebar-accent transition-colors text-muted-foreground hover:text-foreground">
-                    <Settings className="w-4 h-4" />
-                  </button>
                   <button 
                     onClick={() => setVoiceActive(!voiceActive)}
                     className={`p-1.5 rounded-md transition-colors ${
