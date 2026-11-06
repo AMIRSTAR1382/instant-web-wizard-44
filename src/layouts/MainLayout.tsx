@@ -7,6 +7,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { ServerIconsBar } from "@/components/ServerIconsBar";
 import { UserActivity } from "@/components/UserActivity";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { SiteFooter } from "@/components/SiteFooter";
 import { DialogsProvider, useDialogs } from "@/context/DialogsContext";
 import { usePreferences } from "@/context/PreferencesContext";
 
@@ -111,7 +112,7 @@ export const MainLayout = () => {
   return (
     <SidebarProvider>
       <DialogsProvider>
-        {/* An in-page anchor would change the route (hash routing), so focus the content directly. */}
+        {/* Moves keyboard focus straight to the page content, past the navigation. */}
         <button
           type="button"
           onClick={() => contentRef.current?.focus()}
@@ -145,6 +146,7 @@ export const MainLayout = () => {
                     <Outlet />
                   </Suspense>
                 </ErrorBoundary>
+                <SiteFooter />
               </div>
               <UserActivity isOpen={rightSidebarOpen} onClose={closeRightSidebar} />
             </div>

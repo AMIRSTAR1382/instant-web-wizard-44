@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Compass, Home, Search, Users } from "lucide-react";
+import { Compass, Home, Info, Mail, Search, Users } from "lucide-react";
 import {
   CommandDialog,
   CommandEmpty,
@@ -62,6 +62,14 @@ export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
           <CommandItem value="page:explore" keywords={["explore", "اکسپلور", "all", "همه"]} onSelect={() => go("/explore")}>
             <Compass />
             {t("nav.explore")}
+          </CommandItem>
+          <CommandItem value="page:about" keywords={["about", "درباره"]} onSelect={() => go("/about")}>
+            <Info />
+            {t("footer.about")}
+          </CommandItem>
+          <CommandItem value="page:contact" keywords={["contact", "email", "تماس", "ایمیل"]} onSelect={() => go("/contact")}>
+            <Mail />
+            {t("footer.contact")}
           </CommandItem>
           {categories.map((category) => (
             <CommandItem

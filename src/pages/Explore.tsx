@@ -20,7 +20,7 @@ const Explore = () => {
   const { communities, isJoined } = useCommunities();
   const { openCreateCommunity } = useDialogs();
   const [params, setParams] = useSearchParams();
-  useDocumentTitle(t("explore.title"));
+  useDocumentTitle(t("explore.title"), { description: t("explore.subtitle") });
 
   const query = params.get("q") ?? "";
   const rawFilter = params.get("category");

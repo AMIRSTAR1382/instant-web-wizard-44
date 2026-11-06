@@ -7,7 +7,7 @@ import { useDocumentTitle } from "@/hooks/use-document-title";
 const NotFound = () => {
   const location = useLocation();
   const { t, formatNumber } = usePreferences();
-  useDocumentTitle(t("notFound.title"));
+  useDocumentTitle(t("notFound.title"), { noIndex: true });
 
   useEffect(() => {
     console.error("404 Error: User attempted to access non-existent route:", location.pathname);

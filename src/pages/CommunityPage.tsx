@@ -20,6 +20,7 @@ import { useCommunities } from "@/context/CommunitiesContext";
 import { getCategory, getCommunityImage } from "@/data/communities";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import type { TranslationKey } from "@/i18n/en";
+import { copyText } from "@/lib/utils";
 
 const channels: TranslationKey[] = [
   "community.channel.general",
@@ -35,7 +36,10 @@ const CommunityPage = () => {
   const { t, pick, formatCompact, formatNumber, formatRelative } = usePreferences();
   const { communities, getCommunity, isJoined, join, leave, deleteCommunity } = useCommunities();
   const community = getCommunity(id);
-  useDocumentTitle(community ? pick(community.name) : t("community.notFoundTitle"));
+  useDocumentTitle(community ? pick(community.name) : t("community.notFoundTitle"), {
+    description: community ? pick(community.description) : undefined,
+    noIndex: !community,
+  });
 
   if (!community) {
     return (
@@ -71,7 +75,7 @@ const CommunityPage = () => {
 
   const copyLink = async () => {
     try {
-      await navigator.clipboard.writeText(window.location.href);
+      await copyText(window.location.href);
       toast.success(t("community.linkCopied"));
     } catch {
       toast.error(t("community.linkCopyFailed"));

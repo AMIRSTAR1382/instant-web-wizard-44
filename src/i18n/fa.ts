@@ -267,6 +267,35 @@ export const fa: Record<TranslationKey, string> = {
   "profile.errorEmail": "یک ایمیل معتبر وارد کن.",
   "profile.errorPhoto": "این عکس قابل خواندن نبود.",
 
+  // Footer
+  "footer.label": "لینک‌های سایت",
+  "footer.about": "درباره‌ی ما",
+  "footer.contact": "تماس با ما",
+  "footer.privacy": "حریم خصوصی",
+  "footer.terms": "قوانین استفاده",
+  "footer.rights": "© {year} اکسپلور",
+
+  // About / Privacy / Terms
+  "info.updated": "آخرین به‌روزرسانی: {date}",
+
+  // Contact page
+  "contact.title": "تماس با ما",
+  "contact.subtitle": "سؤال یا ایده‌ای داری، یا می‌خواهی در ساختن اکسپلور همراهمان باشی؟ برایمان پیام بفرست.",
+  "contact.name": "نام تو",
+  "contact.email": "ایمیل تو",
+  "contact.message": "پیام",
+  "contact.messagePlaceholder": "چطور می‌توانیم کمکت کنیم؟",
+  "contact.send": "ارسال پیام",
+  "contact.sendNote": "با زدن دکمه، برنامه‌ی ایمیلت با پیام آماده‌ی ارسال باز می‌شود.",
+  "contact.opened": "برنامه‌ی ایمیلت باید الان باز شود. اگر باز نشد، به {email} ایمیل بزن.",
+  "contact.errorName": "لطفاً نامت را بنویس.",
+  "contact.errorEmail": "یک ایمیل معتبر وارد کن.",
+  "contact.errorMessage": "حداقل ۱۰ حرف بنویس.",
+  "contact.subject": "پیام {name} از طریق اکسپلور",
+  "contact.directly": "یا مستقیم با ما در تماس باش",
+  "contact.copyEmail": "کپی آدرس ایمیل",
+  "contact.emailCopied": "آدرس ایمیل کپی شد",
+
   // 404
   "notFound.title": "صفحه پیدا نشد",
   "notFound.text": "صفحه‌ای که دنبالش هستی وجود ندارد یا جابه‌جا شده است.",

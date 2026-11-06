@@ -268,6 +268,35 @@ export const en = {
   "profile.errorEmail": "Enter a valid email address.",
   "profile.errorPhoto": "Couldn't read that image.",
 
+  // Footer
+  "footer.label": "Site links",
+  "footer.about": "About",
+  "footer.contact": "Contact",
+  "footer.privacy": "Privacy",
+  "footer.terms": "Terms",
+  "footer.rights": "© {year} Explore",
+
+  // About / Privacy / Terms
+  "info.updated": "Last updated: {date}",
+
+  // Contact page
+  "contact.title": "Contact us",
+  "contact.subtitle": "Questions, ideas, or want to build Explore with us? Send a message.",
+  "contact.name": "Your name",
+  "contact.email": "Your email",
+  "contact.message": "Message",
+  "contact.messagePlaceholder": "How can we help?",
+  "contact.send": "Send message",
+  "contact.sendNote": "This opens your email app with the message ready to send.",
+  "contact.opened": "Your email app should open now. If it doesn't, write to {email}.",
+  "contact.errorName": "Please enter your name.",
+  "contact.errorEmail": "Enter a valid email address.",
+  "contact.errorMessage": "Write at least 10 characters.",
+  "contact.subject": "Message from {name} via Explore",
+  "contact.directly": "Or reach us directly",
+  "contact.copyEmail": "Copy email address",
+  "contact.emailCopied": "Email address copied",
+
   // 404
   "notFound.title": "Page not found",
   "notFound.text": "The page you're looking for doesn't exist or has moved.",

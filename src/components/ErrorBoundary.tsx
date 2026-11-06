@@ -25,6 +25,17 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
   componentDidCatch(error: Error, info: ErrorInfo) {
     console.error("Page crashed:", error, info.componentStack);
+    // After a new version is uploaded, the old page files are gone. A visitor who still has
+    // the previous version open gets a "failed to load module" error: reload once to fix it.
+    const isStaleBuild = /dynamically imported module|Importing a module script failed|Loading chunk/i.test(error.message);
+    try {
+      if (isStaleBuild && !sessionStorage.getItem("reloadedForNewVersion")) {
+        sessionStorage.setItem("reloadedForNewVersion", "1");
+        window.location.reload();
+      }
+    } catch {
+      // sessionStorage blocked: the reload button below still works.
+    }
   }
 
   render() {

@@ -30,16 +30,22 @@ npm run dev
 
 Other scripts: `npm run build` (production build into `dist/`), `npm run preview` (serve the build), `npm run lint`.
 
-The site uses hash URLs (`/#/gaming`), so the `dist/` folder works on any static host, including GitHub Pages, without extra server settings.
+## Put it online
+
+Set your domain and contact email in `src/config/site.ts`, run `npm run build`, and upload the contents of `dist/`.
+Ready-made settings are included for cPanel / DirectAdmin (`.htaccess`), Netlify (`_redirects`), Vercel (`vercel.json`) and nginx.
+The step-by-step guide (in Persian) is in [DEPLOY.md](DEPLOY.md).
 
 ## Where things live
 
 | Folder / file | What's in it |
 | --- | --- |
-| `src/pages/` | One file per page: home, explore, category, community, 404 |
+| `src/pages/` | One file per page: home, explore, category, community, about / privacy / terms, contact, 404 |
 | `src/components/` | Layout pieces (sidebar, rail, profile panel), cards and dialogs |
 | `src/context/` | Shared state: preferences (language, theme), profile, communities, dialogs |
+| `src/config/site.ts` | Your domain, contact email and social links |
 | `src/data/communities.ts` | Categories and the built-in communities |
+| `src/data/pages.ts` | Text of the About, Privacy and Terms pages |
 | `src/i18n/en.ts`, `src/i18n/fa.ts` | All UI text in English and Persian |
 | `src/index.css` | Theme colours (dark and light) |
 

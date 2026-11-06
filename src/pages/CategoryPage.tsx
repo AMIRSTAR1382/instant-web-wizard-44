@@ -14,7 +14,7 @@ const CategoryPage = ({ categoryId }: { categoryId: CategoryId }) => {
   const { communities } = useCommunities();
   const { openCreateCommunity } = useDialogs();
   const category = getCategory(categoryId);
-  useDocumentTitle(pick(category.name));
+  useDocumentTitle(pick(category.name), { description: pick(category.tagline) });
 
   const items = communities
     .filter((community) => community.category === categoryId)
