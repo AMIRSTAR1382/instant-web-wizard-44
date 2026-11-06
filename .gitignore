@@ -28,3 +28,7 @@ dist-ssr
 
 # TypeScript build cache
 *.tsbuildinfo
+
+# Claude Code: local preview settings and worktrees
+.claude/launch.json
+.claude/worktrees/
