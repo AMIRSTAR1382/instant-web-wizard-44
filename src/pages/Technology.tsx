@@ -4,11 +4,11 @@ import vrCommunity from "@/assets/vr-community.jpg";
 const Technology = () => {
   return (
     <div className="space-y-8 animate-fade-in">
-      <div className="relative h-64 rounded-2xl overflow-hidden">
+      <div className="relative h-48 sm:h-64 rounded-2xl overflow-hidden">
         <img src={vrCommunity} alt="Technology" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
-        <div className="absolute bottom-8 left-8">
-          <h1 className="text-4xl font-bold mb-2">Technology & Innovation</h1>
+        <div className="absolute bottom-4 left-4 right-4 sm:bottom-8 sm:left-8">
+          <h1 className="text-2xl sm:text-4xl font-bold mb-2">Technology & Innovation</h1>
           <p className="text-muted-foreground">Explore cutting-edge technology</p>
         </div>
       </div>

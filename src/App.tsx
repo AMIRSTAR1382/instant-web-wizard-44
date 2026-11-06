@@ -28,9 +28,9 @@ const App = () => (
             <Route path="/entertainment" element={<Entertainment />} />
             <Route path="/coding" element={<Coding />} />
             <Route path="/technology" element={<Technology />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
           </Route>
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>

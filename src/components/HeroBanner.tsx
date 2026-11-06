@@ -10,7 +10,7 @@ export const HeroBanner = () => {
       />
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background/50" />
       <div className="absolute inset-0 flex items-center justify-center">
-        <h1 className="text-4xl font-bold text-foreground drop-shadow-lg">
+        <h1 className="px-4 text-center text-2xl sm:text-4xl font-bold text-foreground drop-shadow-lg">
           Find Your Community
         </h1>
       </div>
