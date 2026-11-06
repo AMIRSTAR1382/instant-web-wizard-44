@@ -28,7 +28,7 @@ npm i
 npm run dev
 ```
 
-Other scripts: `npm run build` (production build into `dist/`), `npm run preview` (serve the build), `npm run lint`.
+Other scripts: `npm run build` (production build into `dist/`), `npm run preview` (serve the build), `npm test` (automated tests), `npm run typecheck` and `npm run lint`.
 
 ## Put it online
 
@@ -48,7 +48,8 @@ The step-by-step guide (in Persian) is in [DEPLOY.md](DEPLOY.md).
 | `src/data/pages.ts` | Text of the About, Privacy and Terms pages |
 | `src/i18n/en.ts`, `src/i18n/fa.ts` | All UI text in English and Persian |
 | `src/index.css` | Theme colours (dark and light) |
+| `src/**/*.test.ts(x)` | Automated tests (Vitest and Testing Library) |
 
 ## Built with
 
-Vite, TypeScript, React, React Router, Tailwind CSS and shadcn/ui.
+Vite, TypeScript, React, React Router, Tailwind CSS, shadcn/ui and the Vazirmatn font. Tests use Vitest and Testing Library.

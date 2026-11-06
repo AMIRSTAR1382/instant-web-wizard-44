@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useMemo, type ReactNode } from "react";
-import defaultAvatar from "@/assets/user-avatar.jpg";
+import defaultAvatar from "@/assets/user-avatar.webp";
 import { usePersistentState } from "@/hooks/use-persistent-state";
 
 export interface Profile {
