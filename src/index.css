@@ -54,6 +54,53 @@ All colors MUST be HSL.
     --shadow-glow: 0 0 30px hsl(280 80% 60% / 0.3);
     --shadow-card: 0 10px 30px -10px hsl(0 0% 0% / 0.5);
   }
+
+  /* Light theme: chosen in Settings > Appearance or with the sun/moon button in the header. */
+  :root.light {
+    --background: 220 25% 97%;
+    --foreground: 225 25% 12%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 225 25% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 225 25% 12%;
+
+    --primary: 280 70% 50%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 220 20% 92%;
+    --secondary-foreground: 225 25% 12%;
+
+    --muted: 220 18% 92%;
+    --muted-foreground: 222 12% 38%;
+
+    --accent: 190 85% 38%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 48%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 16% 86%;
+    --input: 220 16% 86%;
+    --ring: 280 70% 50%;
+
+    --sidebar-background: 220 25% 95%;
+    --sidebar-foreground: 225 20% 25%;
+    --sidebar-primary: 280 70% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 20% 89%;
+    --sidebar-accent-foreground: 225 25% 12%;
+    --sidebar-border: 220 16% 86%;
+    --sidebar-ring: 280 70% 50%;
+
+    --gradient-primary: linear-gradient(135deg, hsl(280 70% 55%) 0%, hsl(290 60% 45%) 100%);
+    --gradient-secondary: linear-gradient(135deg, hsl(0 0% 100%) 0%, hsl(280 60% 92%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(190 85% 40%) 0%, hsl(280 70% 50%) 100%);
+
+    --shadow-glow: 0 0 30px hsl(280 70% 50% / 0.25);
+    --shadow-card: 0 10px 30px -12px hsl(225 25% 20% / 0.25);
+  }
 }
 
 @layer base {
@@ -63,6 +110,37 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+  }
+
+  /* A visible focus ring for keyboard users on anything that doesn't style its own. */
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+
+  /* Persian: Vazirmatn (loaded in index.html), falling back to fonts every system has. */
+  html[lang="fa"] body {
+    font-family: "Vazirmatn", Tahoma, ui-sans-serif, system-ui, sans-serif;
+  }
+
+  /* Letter-spacing breaks the joins between Persian letters. */
+  html[lang="fa"] * {
+    letter-spacing: normal !important;
+  }
+
+  /* Compact mode (Settings > Appearance): everything is sized in rem, so this scales the UI down. */
+  html.compact {
+    font-size: 14px;
+  }
+}
+
+@layer utilities {
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
   }
 }
 

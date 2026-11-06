@@ -1,25 +1,36 @@
 import { useEffect, useRef, useState } from "react";
-import { Bell, BellOff, Settings, X } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Bell, BellOff, LogIn, LogOut, Pencil, PlusCircle, Settings, Trash2, UserCog, X, type LucideIcon } from "lucide-react";
 import { SettingsPanel } from "./user-activity/SettingsPanel";
 import { NotificationsPanel } from "./user-activity/NotificationsPanel";
-import { currentUser } from "@/data/currentUser";
-import { initialNotifications } from "@/data/notifications";
+import { usePreferences } from "@/context/PreferencesContext";
+import { useProfile } from "@/context/ProfileContext";
+import { useDialogs } from "@/context/DialogsContext";
+import { createInitialNotifications, type Notification } from "@/data/notifications";
+import { useActivityLog, type ActivityType } from "@/hooks/use-activity-log";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { usePersistentState } from "@/hooks/use-persistent-state";
+import type { TranslationKey } from "@/i18n/en";
+import { cn } from "@/lib/utils";
 
 type Panel = "main" | "settings" | "notifications";
 
+// Sample members until there is a server.
 const newMembers = [
-  { name: "Naruto Uzumaki", time: "3 min ago", avatar: "🦊" },
-  { name: "Son Goku", time: "12 min ago", avatar: "🐉" },
-  { name: "Monkey D. Luffy", time: "15 min ago", avatar: "🏴‍☠️" },
-  { name: "Tanjiro Kamado", time: "30 min ago", avatar: "⚔️" },
+  { name: "Naruto Uzumaki", minutesAgo: 3, avatar: "🦊" },
+  { name: "Son Goku", minutesAgo: 12, avatar: "🐉" },
+  { name: "Monkey D. Luffy", minutesAgo: 15, avatar: "🏴‍☠️" },
+  { name: "Tanjiro Kamado", minutesAgo: 30, avatar: "⚔️" },
 ];
+const pageLoadedAt = Date.now();
 
-const recentActivity = [
-  { name: "Yumeko", action: "started following you", time: "1 hour ago" },
-  { name: "Todoroki", action: "started following you", time: "3 hours ago" },
-];
+const activityDisplay: Record<ActivityType, { icon: LucideIcon; text: TranslationKey }> = {
+  joined: { icon: LogIn, text: "activity.joined" },
+  left: { icon: LogOut, text: "activity.left" },
+  created: { icon: PlusCircle, text: "activity.created" },
+  deleted: { icon: Trash2, text: "activity.deleted" },
+  profile: { icon: UserCog, text: "activity.profile" },
+};
 
 interface UserActivityProps {
   isOpen?: boolean;
@@ -27,9 +38,16 @@ interface UserActivityProps {
 }
 
 export const UserActivity = ({ isOpen = false, onClose }: UserActivityProps) => {
+  const { t, pick, formatRelative } = usePreferences();
+  const { profile, avatarUrl } = useProfile();
+  const { openEditProfile } = useDialogs();
+  const { entries: activity, clear: clearActivity } = useActivityLog();
   const [activePanel, setActivePanel] = useState<Panel>("main");
   // Notifications live here (not inside NotificationsPanel) so the bell badge can read them too.
-  const [notifications, setNotifications] = useState(initialNotifications);
+  const [notifications, setNotifications] = usePersistentState<Notification[]>(
+    "notifications.items",
+    createInitialNotifications(),
+  );
   const [muted, setMuted] = usePersistentState("notifications.muted", false);
 
   // From xl up the panel is a permanent column; below that it is a slide-in drawer.
@@ -68,12 +86,17 @@ export const UserActivity = ({ isOpen = false, onClose }: UserActivityProps) => 
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [isDesktop, isOpen, onClose]);
 
+  // Following a link inside the drawer closes it on small screens.
+  const closeIfDrawer = () => {
+    if (!isDesktop) onClose?.();
+  };
+
   return (
     <>
       {isOpen && (
         <div
           aria-hidden="true"
-          className="fixed inset-0 bg-background/80 backdrop-blur-sm z-40 xl:hidden"
+          className="fixed inset-0 z-40 bg-background/80 backdrop-blur-sm xl:hidden"
           onClick={onClose}
         />
       )}
@@ -81,136 +104,186 @@ export const UserActivity = ({ isOpen = false, onClose }: UserActivityProps) => 
       <aside
         ref={asideRef}
         tabIndex={-1}
-        aria-label="Profile and activity"
-        className={`
-          fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-card border-l border-border overflow-hidden z-50 outline-none
-          transform transition-transform duration-300 ease-out
-          xl:relative xl:max-w-none xl:translate-x-0
-          ${isOpen ? "translate-x-0" : "translate-x-full"}
-        `}
+        aria-label={t("panel.label")}
+        className={cn(
+          "fixed end-0 top-0 z-50 h-full w-80 max-w-[85vw] overflow-hidden border-s border-border bg-card outline-none",
+          "transform transition-transform duration-300 ease-out",
+          "xl:relative xl:max-w-none xl:translate-x-0 xl:rtl:translate-x-0",
+          isOpen ? "translate-x-0" : "translate-x-full rtl:-translate-x-full",
+        )}
       >
         {/* Main Content */}
         <div
           ref={mainPanelRef}
-          className={`absolute inset-0 p-6 overflow-y-auto transition-transform duration-300 ease-out ${
-            activePanel !== "main" ? "-translate-x-full" : "translate-x-0"
-          }`}
+          className={cn(
+            "absolute inset-0 overflow-y-auto p-6 transition-transform duration-300 ease-out",
+            activePanel !== "main" ? "-translate-x-full rtl:translate-x-full" : "translate-x-0",
+          )}
         >
-          <div className="flex items-center justify-between xl:justify-end mb-8">
+          <div className="mb-8 flex items-center justify-between xl:justify-end">
             {/* Close button lives in the header row so it can't cover the other buttons. */}
             <button
               onClick={onClose}
-              aria-label="Close panel"
-              className="xl:hidden w-8 h-8 rounded-full bg-secondary flex items-center justify-center hover:bg-primary/20 transition-all"
+              aria-label={t("panel.close")}
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary transition-all hover:bg-primary/20 xl:hidden"
             >
-              <X className="w-4 h-4" />
+              <X className="h-4 w-4" />
             </button>
             <div className="flex gap-3">
               <button
                 onClick={() => setActivePanel("notifications")}
-                aria-label={showUnreadDot ? `Notifications, ${unreadCount} unread` : "Notifications"}
-                className="w-8 h-8 rounded-full bg-card flex items-center justify-center hover:bg-secondary transition-colors hover:scale-110 duration-300 relative"
+                aria-label={showUnreadDot ? t("panel.notificationsUnread", { count: unreadCount }) : t("panel.notifications")}
+                title={t("panel.notifications")}
+                className="relative flex h-8 w-8 items-center justify-center rounded-full bg-card transition-colors duration-300 hover:scale-110 hover:bg-secondary"
               >
-                {muted ? <BellOff className="w-4 h-4" /> : <Bell className="w-4 h-4" />}
+                {muted ? <BellOff className="h-4 w-4" /> : <Bell className="h-4 w-4" />}
                 {showUnreadDot && (
                   <span
                     aria-hidden="true"
-                    className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-primary rounded-full border border-card"
+                    className="absolute -end-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border border-card bg-primary"
                   />
                 )}
               </button>
               <button
                 onClick={() => setActivePanel("settings")}
-                aria-label="Settings"
-                className="w-8 h-8 rounded-full bg-card flex items-center justify-center hover:bg-secondary transition-colors hover:rotate-90 duration-300"
+                aria-label={t("panel.settings")}
+                title={t("panel.settings")}
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-card transition-colors duration-300 hover:rotate-90 hover:bg-secondary"
               >
-                <Settings className="w-4 h-4" />
+                <Settings className="h-4 w-4" />
               </button>
             </div>
           </div>
 
           <div className="mb-8">
-            <div className="flex items-center justify-center gap-4 mb-4">
-              <div className="flex items-center gap-1 h-24" aria-hidden="true">
+            <div className="mb-4 flex items-center justify-center gap-4">
+              <div className="flex h-24 items-center gap-1" aria-hidden="true">
                 {[0.6, 1, 0.4, 0.8, 0.5].map((scale, i) => (
                   <div
                     key={`left-${i}`}
-                    className="w-1 bg-gradient-to-t from-primary to-accent rounded-full animate-voice-bar"
+                    className="w-1 animate-voice-bar rounded-full bg-gradient-to-t from-primary to-accent"
                     style={{ animationDelay: `${i * 0.1}s`, height: `${scale * 100}%` }}
                   />
                 ))}
               </div>
-              <div className="w-24 h-24 relative">
-                <div className="absolute inset-0 bg-gradient-accent rounded-full blur-xl opacity-50 animate-pulse" />
+              <div className="relative h-24 w-24">
+                <div className="absolute inset-0 animate-pulse rounded-full bg-gradient-accent opacity-50 blur-xl" />
                 <img
-                  src={currentUser.avatar}
+                  src={avatarUrl}
                   alt=""
-                  className="relative w-full h-full object-cover rounded-full shadow-glow border-2 border-primary/20"
+                  className="relative h-full w-full rounded-full border-2 border-primary/20 object-cover shadow-glow"
                 />
               </div>
-              <div className="flex items-center gap-1 h-24" aria-hidden="true">
+              <div className="flex h-24 items-center gap-1" aria-hidden="true">
                 {[0.5, 0.8, 0.4, 1, 0.6].map((scale, i) => (
                   <div
                     key={`right-${i}`}
-                    className="w-1 bg-gradient-to-t from-accent to-primary rounded-full animate-voice-bar"
+                    className="w-1 animate-voice-bar rounded-full bg-gradient-to-t from-accent to-primary"
                     style={{ animationDelay: `${i * 0.15}s`, height: `${scale * 100}%` }}
                   />
                 ))}
               </div>
             </div>
-            <h2 className="text-center text-xl font-bold">{currentUser.displayName}</h2>
-            <p className="text-center text-sm text-muted-foreground">{currentUser.username}</p>
+            <h2 className="text-center text-xl font-bold">{profile.displayName}</h2>
+            <p className="text-center text-sm text-muted-foreground" dir="ltr">
+              @{profile.username}
+            </p>
+            {profile.bio && <p className="mt-2 text-center text-sm text-muted-foreground">{profile.bio}</p>}
+            <div className="mt-3 flex justify-center">
+              <button
+                onClick={openEditProfile}
+                className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1.5 text-xs font-medium transition-colors hover:bg-primary/20"
+              >
+                <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
+                {t("panel.editProfile")}
+              </button>
+            </div>
           </div>
 
-          <div className="mb-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-semibold">New Member</h3>
-              <button className="text-xs text-muted-foreground hover:text-foreground transition-colors">See all</button>
-            </div>
-            <div className="space-y-3">
+          <section className="mb-6" aria-labelledby="panel-new-members">
+            <h3 id="panel-new-members" className="mb-4 text-sm font-semibold">
+              {t("panel.newMembers")}
+            </h3>
+            <ul className="space-y-3">
               {newMembers.map((member) => (
-                <div key={member.name} className="flex items-center gap-3 group cursor-pointer animate-fade-in hover:translate-x-1 transition-all">
-                  <div className="w-10 h-10 rounded-full bg-gradient-primary flex items-center justify-center text-lg group-hover:scale-110 transition-transform border border-primary/30">
+                <li key={member.name} className="flex items-center gap-3">
+                  <div
+                    aria-hidden="true"
+                    className="flex h-10 w-10 items-center justify-center rounded-full border border-primary/30 bg-gradient-primary text-lg"
+                  >
                     {member.avatar}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{member.name}</p>
-                    <p className="text-xs text-muted-foreground">{member.time}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-semibold">Recent Activity</h3>
-              <button className="text-xs text-muted-foreground hover:text-foreground transition-colors">See all</button>
-            </div>
-            <div className="space-y-3">
-              {recentActivity.map((activity) => (
-                <div key={activity.name} className="flex items-center gap-3 group cursor-pointer animate-fade-in hover:translate-x-1 transition-all">
-                  <div className="w-10 h-10 rounded-full bg-gradient-accent flex items-center justify-center text-sm font-bold group-hover:scale-110 transition-transform border border-accent/30">
-                    {activity.name[0]}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{activity.name}</p>
-                    <p className="text-xs text-muted-foreground truncate">
-                      {activity.action} · {activity.time}
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium">{member.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {formatRelative(pageLoadedAt - member.minutesAgo * 60_000)}
                     </p>
                   </div>
-                </div>
+                </li>
               ))}
+            </ul>
+          </section>
+
+          <section aria-labelledby="panel-activity">
+            <div className="mb-4 flex items-center justify-between">
+              <h3 id="panel-activity" className="text-sm font-semibold">
+                {t("panel.yourActivity")}
+              </h3>
+              {activity.length > 0 && (
+                <button
+                  onClick={clearActivity}
+                  className="text-xs text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  {t("activity.clear")}
+                </button>
+              )}
             </div>
-          </div>
+            {activity.length === 0 ? (
+              <p className="rounded-lg bg-secondary/40 p-3 text-xs text-muted-foreground">{t("panel.noActivity")}</p>
+            ) : (
+              <ul className="space-y-3">
+                {activity.slice(0, 6).map((entry) => {
+                  const display = activityDisplay[entry.type];
+                  const text = t(display.text, { name: entry.communityName ? pick(entry.communityName) : "" });
+                  const content = (
+                    <>
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-accent/30 bg-gradient-accent text-primary-foreground">
+                        <display.icon className="h-4 w-4" aria-hidden="true" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium">{text}</p>
+                        <p className="text-xs text-muted-foreground">{formatRelative(entry.at)}</p>
+                      </div>
+                    </>
+                  );
+                  return (
+                    <li key={entry.id}>
+                      {entry.communityId && entry.type !== "left" ? (
+                        <Link
+                          to={`/community/${entry.communityId}`}
+                          onClick={closeIfDrawer}
+                          className="-m-1 flex items-center gap-3 rounded-lg p-1 transition-colors hover:bg-secondary/60"
+                        >
+                          {content}
+                        </Link>
+                      ) : (
+                        <div className="flex items-center gap-3">{content}</div>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </section>
         </div>
 
         {/* Settings Panel */}
         <div
           ref={settingsPanelRef}
-          className={`absolute inset-0 transition-transform duration-300 ease-out ${
-            activePanel === "settings" ? "translate-x-0" : "translate-x-full"
-          }`}
+          className={cn(
+            "absolute inset-0 transition-transform duration-300 ease-out",
+            activePanel === "settings" ? "translate-x-0" : "translate-x-full rtl:-translate-x-full",
+          )}
         >
           <SettingsPanel onBack={() => setActivePanel("main")} />
         </div>
@@ -218,9 +291,10 @@ export const UserActivity = ({ isOpen = false, onClose }: UserActivityProps) => 
         {/* Notifications Panel */}
         <div
           ref={notificationsPanelRef}
-          className={`absolute inset-0 transition-transform duration-300 ease-out ${
-            activePanel === "notifications" ? "translate-x-0" : "translate-x-full"
-          }`}
+          className={cn(
+            "absolute inset-0 transition-transform duration-300 ease-out",
+            activePanel === "notifications" ? "translate-x-0" : "translate-x-full rtl:-translate-x-full",
+          )}
         >
           <NotificationsPanel
             notifications={notifications}
