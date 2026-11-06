@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ArrowLeft, User, Shield, Palette, Volume2, Globe,
   Eye, EyeOff, Lock, Bell, BellOff, Moon, Sun, Monitor,
@@ -6,6 +6,8 @@ import {
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
+import { currentUser } from "@/data/currentUser";
+import { usePersistentState } from "@/hooks/use-persistent-state";
 
 type SettingsView = "main" | "account" | "privacy" | "appearance" | "voice" | "language";
 
@@ -32,29 +34,35 @@ interface SettingsPanelProps {
 
 export const SettingsPanel = ({ onBack }: SettingsPanelProps) => {
   const [view, setView] = useState<SettingsView>("main");
-  const [selectedLang, setSelectedLang] = useState("en");
-  const [selectedTheme, setSelectedTheme] = useState("dark");
+  // Every preference below is saved in localStorage, so it survives a page reload.
+  const [selectedLang, setSelectedLang] = usePersistentState("settings.language", "en");
+  const [selectedTheme, setSelectedTheme] = usePersistentState("settings.theme", "dark");
 
   // Privacy toggles
-  const [showOnlineStatus, setShowOnlineStatus] = useState(true);
-  const [showActivity, setShowActivity] = useState(true);
-  const [allowDMs, setAllowDMs] = useState(true);
-  const [readReceipts, setReadReceipts] = useState(false);
+  const [showOnlineStatus, setShowOnlineStatus] = usePersistentState("settings.showOnlineStatus", true);
+  const [showActivity, setShowActivity] = usePersistentState("settings.showActivity", true);
+  const [allowDMs, setAllowDMs] = usePersistentState("settings.allowDMs", true);
+  const [readReceipts, setReadReceipts] = usePersistentState("settings.readReceipts", false);
 
   // Voice settings
-  const [inputVolume, setInputVolume] = useState([75]);
-  const [outputVolume, setOutputVolume] = useState([80]);
-  const [noiseSuppression, setNoiseSuppression] = useState(true);
-  const [echoCancellation, setEchoCancellation] = useState(true);
-  const [autoGainControl, setAutoGainControl] = useState(true);
+  const [inputVolume, setInputVolume] = usePersistentState("settings.inputVolume", [75]);
+  const [outputVolume, setOutputVolume] = usePersistentState("settings.outputVolume", [80]);
+  const [noiseSuppression, setNoiseSuppression] = usePersistentState("settings.noiseSuppression", true);
+  const [echoCancellation, setEchoCancellation] = usePersistentState("settings.echoCancellation", true);
+  const [autoGainControl, setAutoGainControl] = usePersistentState("settings.autoGainControl", true);
 
   // Appearance
-  const [compactMode, setCompactMode] = useState(false);
-  const [animationsEnabled, setAnimationsEnabled] = useState(true);
+  const [compactMode, setCompactMode] = usePersistentState("settings.compactMode", false);
+  const [animationsEnabled, setAnimationsEnabled] = usePersistentState("settings.animations", true);
 
   // Notification settings for account
-  const [emailNotifs, setEmailNotifs] = useState(true);
-  const [pushNotifs, setPushNotifs] = useState(true);
+  const [emailNotifs, setEmailNotifs] = usePersistentState("settings.emailNotifications", true);
+  const [pushNotifs, setPushNotifs] = usePersistentState("settings.pushNotifications", true);
+
+  // The Animations switch turns motion off site-wide (see .reduce-motion in index.css).
+  useEffect(() => {
+    document.documentElement.classList.toggle("reduce-motion", !animationsEnabled);
+  }, [animationsEnabled]);
 
   const settingsOptions = [
     { icon: User, label: "My Account", description: "Manage your account settings", view: "account" as SettingsView },
@@ -88,6 +96,7 @@ export const SettingsPanel = ({ onBack }: SettingsPanelProps) => {
       <div className="flex items-center gap-3 mb-8">
         <button
           onClick={handleBack}
+          aria-label="Back"
           className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center hover:bg-primary/20 transition-all hover:-translate-x-1 duration-200"
         >
           <ArrowLeft className="w-4 h-4" />
@@ -133,11 +142,11 @@ export const SettingsPanel = ({ onBack }: SettingsPanelProps) => {
           <div className="bg-secondary/50 rounded-xl p-4">
             <div className="flex items-center gap-4 mb-4">
               <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-2xl font-bold text-primary-foreground">
-                A
+                {currentUser.displayName[0]}
               </div>
               <div>
-                <p className="font-semibold">Md Amir Khan</p>
-                <p className="text-sm text-muted-foreground">aamiiillliirrr</p>
+                <p className="font-semibold">{currentUser.displayName}</p>
+                <p className="text-sm text-muted-foreground">{currentUser.username}</p>
               </div>
             </div>
             <button className="w-full py-2 rounded-lg bg-primary/20 text-primary hover:bg-primary/30 transition-colors text-sm font-medium">
@@ -150,7 +159,7 @@ export const SettingsPanel = ({ onBack }: SettingsPanelProps) => {
             <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Account Info</h3>
             <div className="bg-secondary/30 rounded-lg p-3">
               <p className="text-xs text-muted-foreground">Username</p>
-              <p className="text-sm font-medium">aamiiillliirrr</p>
+              <p className="text-sm font-medium">{currentUser.username}</p>
             </div>
             <div className="bg-secondary/30 rounded-lg p-3">
               <p className="text-xs text-muted-foreground">Email</p>

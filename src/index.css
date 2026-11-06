@@ -65,3 +65,25 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+/* Turn motion off for people who ask for it: the OS "reduce motion" setting, or the
+   Animations switch in Settings (which adds .reduce-motion to <html>). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+html.reduce-motion *,
+html.reduce-motion *::before,
+html.reduce-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
