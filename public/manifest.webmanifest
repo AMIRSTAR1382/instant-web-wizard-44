@@ -1,0 +1,11 @@
+{
+  "name": "Explore | Find your community",
+  "short_name": "Explore",
+  "description": "Discover and join gaming, music, coding, art and technology communities.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0f121a",
+  "theme_color": "#0f121a",
+  "icons": [{ "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}

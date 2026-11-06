@@ -1,15 +1,18 @@
 import { useState, type Dispatch, type SetStateAction } from "react";
-import { ArrowLeft, CheckCheck, Trash2, Bell, BellOff } from "lucide-react";
+import { ArrowLeft, Bell, BellOff, CheckCheck, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import type { Notification } from "@/data/notifications";
+import { notificationIcons, type Notification } from "@/data/notifications";
+import { usePreferences } from "@/context/PreferencesContext";
+import type { TranslationKey } from "@/i18n/en";
+import { cn } from "@/lib/utils";
 
 type NotifFilter = "all" | "unread" | "mentions" | "follows";
 
-const filters: { key: NotifFilter; label: string }[] = [
-  { key: "all", label: "All" },
-  { key: "unread", label: "Unread" },
-  { key: "mentions", label: "Mentions" },
-  { key: "follows", label: "Follows" },
+const filters: { key: NotifFilter; label: TranslationKey }[] = [
+  { key: "all", label: "notifications.filter.all" },
+  { key: "unread", label: "notifications.filter.unread" },
+  { key: "mentions", label: "notifications.filter.mentions" },
+  { key: "follows", label: "notifications.filter.follows" },
 ];
 
 interface NotificationsPanelProps {
@@ -27,6 +30,7 @@ export const NotificationsPanel = ({
   onMutedChange,
   onBack,
 }: NotificationsPanelProps) => {
+  const { t, pick, formatNumber, formatRelative } = usePreferences();
   const [activeFilter, setActiveFilter] = useState<NotifFilter>("all");
 
   const filteredNotifications = notifications.filter((n) => {
@@ -53,137 +57,143 @@ export const NotificationsPanel = ({
   const clearAll = () => {
     const previous = notifications;
     onNotificationsChange([]);
-    toast("All notifications cleared", {
-      action: { label: "Undo", onClick: () => onNotificationsChange(previous) },
+    toast(t("notifications.cleared"), {
+      action: { label: t("common.undo"), onClick: () => onNotificationsChange(previous) },
     });
   };
 
   return (
-    <div className="absolute inset-0 p-6 overflow-y-auto">
-      <div className="flex items-center gap-3 mb-6">
+    <div className="absolute inset-0 overflow-y-auto p-6">
+      <div className="mb-6 flex items-center gap-3">
         <button
           onClick={onBack}
-          aria-label="Back"
-          className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center hover:bg-primary/20 transition-all hover:-translate-x-1 duration-200"
+          aria-label={t("common.back")}
+          className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary transition-all duration-200 hover:-translate-x-1 hover:bg-primary/20 rtl:hover:translate-x-1"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="h-4 w-4 rtl:rotate-180" />
         </button>
-        <h2 className="text-lg font-bold flex-1">Notifications</h2>
+        <h2 className="flex-1 text-lg font-bold">{t("notifications.title")}</h2>
         {unreadCount > 0 && (
-          <span className="px-2 py-0.5 rounded-full bg-primary/20 text-primary text-xs font-medium">
-            {unreadCount}
+          <span className="rounded-full bg-primary/20 px-2 py-0.5 text-xs font-medium text-primary">
+            {formatNumber(unreadCount)}
           </span>
         )}
         <button
           onClick={() => onMutedChange(!muted)}
           aria-pressed={muted}
-          aria-label={muted ? "Unmute notifications" : "Mute notifications"}
-          title={muted ? "Unmute notifications" : "Mute all"}
-          className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
-            muted ? "bg-destructive/20 text-destructive" : "bg-secondary hover:bg-primary/20"
-          }`}
+          aria-label={muted ? t("notifications.unmute") : t("notifications.mute")}
+          title={muted ? t("notifications.unmute") : t("notifications.mute")}
+          className={cn(
+            "flex h-8 w-8 items-center justify-center rounded-full transition-all",
+            muted ? "bg-destructive/20 text-destructive" : "bg-secondary hover:bg-primary/20",
+          )}
         >
-          {muted ? <BellOff className="w-4 h-4" /> : <Bell className="w-4 h-4" />}
+          {muted ? <BellOff className="h-4 w-4" /> : <Bell className="h-4 w-4" />}
         </button>
       </div>
 
-      {muted && (
-        <p className="mb-4 text-xs text-muted-foreground">
-          Notifications are muted. The unread badge is hidden until you unmute.
-        </p>
-      )}
+      {muted && <p className="mb-4 text-xs text-muted-foreground">{t("notifications.mutedNotice")}</p>}
 
       {/* Filters */}
-      <div className="flex gap-2 mb-4 overflow-x-auto pb-1">
+      <div className="no-scrollbar mb-4 flex gap-2 overflow-x-auto pb-1">
         {filters.map((filter) => (
           <button
             key={filter.key}
             onClick={() => setActiveFilter(filter.key)}
             aria-pressed={activeFilter === filter.key}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
+            className={cn(
+              "whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-medium transition-all",
               activeFilter === filter.key
                 ? "bg-primary text-primary-foreground"
-                : "bg-secondary/50 text-muted-foreground hover:bg-secondary"
-            }`}
+                : "bg-secondary/50 text-muted-foreground hover:bg-secondary",
+            )}
           >
-            {filter.label}
-            {filter.key === "unread" && unreadCount > 0 && <span className="ml-1">({unreadCount})</span>}
+            {t(filter.label)}
           </button>
         ))}
       </div>
 
       {/* Actions */}
       {notifications.length > 0 && (
-        <div className="flex gap-2 mb-4">
+        <div className="mb-4 flex gap-2">
           <button
             onClick={markAllRead}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-secondary/50 text-xs text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+            disabled={unreadCount === 0}
+            className="flex items-center gap-1.5 rounded-lg bg-secondary/50 px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground disabled:pointer-events-none disabled:opacity-50"
           >
-            <CheckCheck className="w-3.5 h-3.5" />
-            Mark all read
+            <CheckCheck className="h-3.5 w-3.5" />
+            {t("notifications.markAllRead")}
           </button>
           <button
             onClick={clearAll}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-secondary/50 text-xs text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+            className="flex items-center gap-1.5 rounded-lg bg-secondary/50 px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
           >
-            <Trash2 className="w-3.5 h-3.5" />
-            Clear all
+            <Trash2 className="h-3.5 w-3.5" />
+            {t("notifications.clearAll")}
           </button>
         </div>
       )}
 
       {/* Notifications List */}
-      <div className="space-y-2">
+      <ul className="space-y-2">
         {filteredNotifications.length === 0 ? (
-          <div className="text-center py-12">
-            <Bell className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
+          <li className="py-12 text-center">
+            <Bell className="mx-auto mb-3 h-12 w-12 text-muted-foreground/30" />
             <p className="text-sm text-muted-foreground">
-              {activeFilter === "unread" ? "No unread notifications" : "No notifications yet"}
+              {activeFilter === "unread" ? t("notifications.emptyUnreadTitle") : t("notifications.emptyTitle")}
             </p>
-            <p className="text-xs text-muted-foreground/60 mt-1">
-              {activeFilter === "unread" ? "You're all caught up!" : "We'll notify you when something happens"}
+            <p className="mt-1 text-xs text-muted-foreground/60">
+              {activeFilter === "unread" ? t("notifications.emptyUnreadText") : t("notifications.emptyText")}
             </p>
-          </div>
+          </li>
         ) : (
-          filteredNotifications.map((notification, index) => (
-            <div
-              key={notification.id}
-              onClick={() => markAsRead(notification.id)}
-              className={`flex items-start gap-3 p-3 rounded-lg transition-all group cursor-pointer animate-fade-in relative ${
-                notification.read ? "hover:bg-secondary/50" : "bg-primary/5 hover:bg-primary/10 border-l-2 border-primary"
-              }`}
-              style={{ animationDelay: `${index * 0.03}s` }}
-            >
-              <div
-                className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-transform group-hover:scale-110 ${
-                  notification.read ? "bg-secondary" : "bg-gradient-to-br from-accent/30 to-primary/30"
-                }`}
+          filteredNotifications.map((notification, index) => {
+            const Icon = notificationIcons[notification.category];
+            return (
+              <li
+                key={notification.id}
+                className={cn(
+                  "group relative flex animate-fade-in items-start gap-3 rounded-lg p-3 transition-all",
+                  notification.read ? "hover:bg-secondary/50" : "border-s-2 border-primary bg-primary/5 hover:bg-primary/10",
+                )}
+                style={{ animationDelay: `${index * 0.03}s` }}
               >
-                <notification.icon className="w-4 h-4" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <p className={`text-sm ${notification.read ? "" : "font-semibold"}`}>{notification.title}</p>
-                  {!notification.read && <div className="w-2 h-2 rounded-full bg-primary shrink-0" />}
-                </div>
-                <p className="text-xs text-muted-foreground truncate">{notification.description}</p>
-                <p className="text-xs text-muted-foreground/50 mt-0.5">{notification.time}</p>
-              </div>
-              {/* Always visible on touch screens; on devices with a mouse it appears on hover/focus. */}
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  deleteNotification(notification.id);
-                }}
-                aria-label="Delete notification"
-                className="opacity-100 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 focus-visible:opacity-100 w-6 h-6 rounded-full bg-secondary flex items-center justify-center hover:bg-destructive/20 hover:text-destructive transition-all shrink-0"
-              >
-                <Trash2 className="w-3 h-3" />
-              </button>
-            </div>
-          ))
+                {/* The whole row marks the notification as read; the delete button sits on top of it. */}
+                <button
+                  onClick={() => markAsRead(notification.id)}
+                  className="flex min-w-0 flex-1 items-start gap-3 text-start"
+                  aria-label={`${pick(notification.title)}: ${pick(notification.description)}`}
+                >
+                  <div
+                    className={cn(
+                      "flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-transform group-hover:scale-110",
+                      notification.read ? "bg-secondary" : "bg-gradient-to-br from-accent/30 to-primary/30",
+                    )}
+                  >
+                    <Icon className="h-4 w-4" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <p className={cn("text-sm", !notification.read && "font-semibold")}>{pick(notification.title)}</p>
+                      {!notification.read && <span className="h-2 w-2 shrink-0 rounded-full bg-primary" aria-hidden="true" />}
+                    </div>
+                    <p className="truncate text-xs text-muted-foreground">{pick(notification.description)}</p>
+                    <p className="mt-0.5 text-xs text-muted-foreground/60">{formatRelative(notification.at)}</p>
+                  </div>
+                </button>
+                {/* Always visible on touch screens; on devices with a mouse it appears on hover/focus. */}
+                <button
+                  onClick={() => deleteNotification(notification.id)}
+                  aria-label={t("notifications.delete")}
+                  className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-secondary opacity-100 transition-all hover:bg-destructive/20 hover:text-destructive focus-visible:opacity-100 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100"
+                >
+                  <Trash2 className="h-3 w-3" />
+                </button>
+              </li>
+            );
+          })
         )}
-      </div>
+      </ul>
     </div>
   );
 };

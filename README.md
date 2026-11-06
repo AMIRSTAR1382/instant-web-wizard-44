@@ -1,58 +1,54 @@
-# Welcome to your Lovable project
+# Explore: find your community
 
 ## Project info
 
   This is my own project for a web or web app like discord whit new design and diferents this project is a idea for iranian companys and gamers and all developers 
    if someone want to use it its open but take a hand to me for work with nxt gen of web and web app we need work on it together and make our company 🤝😉
 
-## How can I edit this code?
+## What it does
 
-copy the clone and use on your code editor
+- Browse communities by category (gaming, music, entertainment, coding, technology, art), with a page for every community
+- Search everything with `Ctrl+K` (or `/`), in English or Persian
+- Join and leave communities, create your own, and edit your profile
+- English and Persian (فارسی) with a full right-to-left layout, Persian digits and dates
+- Dark, light and system themes, compact mode, and an option to turn animations off
+- Works on phones, tablets and desktops
 
-**Use your preferred IDE**
+There is no backend yet: profiles, memberships and settings are saved in the visitor's browser.
+See [CHECKLIST.md](CHECKLIST.md) (in Persian) for what is done and what comes next.
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## Run it locally
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+You need [Node.js](https://nodejs.org/) 18 or newer.
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
 git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
 cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
 npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+Other scripts: `npm run build` (production build into `dist/`), `npm run preview` (serve the build), `npm run lint`.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Put it online
 
-**Use GitHub Codespaces**
+Set your domain and contact email in `src/config/site.ts`, run `npm run build`, and upload the contents of `dist/`.
+Ready-made settings are included for cPanel / DirectAdmin (`.htaccess`), Netlify (`_redirects`), Vercel (`vercel.json`) and nginx.
+The step-by-step guide (in Persian) is in [DEPLOY.md](DEPLOY.md).
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Where things live
 
-## What technologies are used for this project?
+| Folder / file | What's in it |
+| --- | --- |
+| `src/pages/` | One file per page: home, explore, category, community, about / privacy / terms, contact, 404 |
+| `src/components/` | Layout pieces (sidebar, rail, profile panel), cards and dialogs |
+| `src/context/` | Shared state: preferences (language, theme), profile, communities, dialogs |
+| `src/config/site.ts` | Your domain, contact email and social links |
+| `src/data/communities.ts` | Categories and the built-in communities |
+| `src/data/pages.ts` | Text of the About, Privacy and Terms pages |
+| `src/i18n/en.ts`, `src/i18n/fa.ts` | All UI text in English and Persian |
+| `src/index.css` | Theme colours (dark and light) |
 
-This project is built with:
+## Built with
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-
+Vite, TypeScript, React, React Router, Tailwind CSS and shadcn/ui.
