@@ -1,0 +1,20 @@
+{
+  "platform": "docker",
+  "port": 8090,
+  "build": {
+    "location": "germany"
+  },
+  "disks": [
+    {
+      "name": "data",
+      "mountTo": "/pb/pb_data"
+    }
+  ],
+  "healthCheck": {
+    "command": "CMD wget -q --spider http://localhost:8090/api/health || exit 1",
+    "interval": 30,
+    "timeout": 10,
+    "retries": 3,
+    "startPeriod": 15
+  }
+}

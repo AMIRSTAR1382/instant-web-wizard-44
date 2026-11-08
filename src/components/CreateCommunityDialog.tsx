@@ -25,6 +25,7 @@ import {
   type CommunityImageKey,
 } from "@/data/communities";
 import type { TranslationKey } from "@/i18n/en";
+import { errorMessageKey } from "@/lib/backend/messages";
 import { cn } from "@/lib/utils";
 
 const NAME_MAX = 40;
@@ -47,6 +48,8 @@ export const CreateCommunityDialog = ({ open, onOpenChange, initialCategory }: C
   const [category, setCategory] = useState<CategoryId>(initialCategory ?? "gaming");
   const [image, setImage] = useState<CommunityImageKey>(getCategory(initialCategory ?? "gaming").image);
   const [submitted, setSubmitted] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [failure, setFailure] = useState<TranslationKey | null>(null);
 
   // Start from a clean form every time the dialog opens.
   useEffect(() => {
@@ -57,6 +60,8 @@ export const CreateCommunityDialog = ({ open, onOpenChange, initialCategory }: C
     setCategory(startCategory);
     setImage(getCategory(startCategory).image);
     setSubmitted(false);
+    setBusy(false);
+    setFailure(null);
   }, [open, initialCategory]);
 
   const nameLength = name.trim().length;
@@ -66,17 +71,26 @@ export const CreateCommunityDialog = ({ open, onOpenChange, initialCategory }: C
   const aboutError: TranslationKey | null =
     aboutLength < 10 ? "create.errorAboutShort" : aboutLength > ABOUT_MAX ? "create.errorAboutLong" : null;
 
-  const handleSubmit = (event: FormEvent) => {
+  const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
+    if (busy) return;
     setSubmitted(true);
+    setFailure(null);
     if (nameError || aboutError) {
       document.getElementById(nameError ? `${formId}-name` : `${formId}-about`)?.focus();
       return;
     }
-    const community = createCommunity({ name, description: about, category, image });
-    onOpenChange(false);
-    toast.success(t("create.created", { name: pick(community.name) }));
-    navigate(`/community/${community.id}`);
+    setBusy(true);
+    try {
+      const community = await createCommunity({ name, description: about, category, image });
+      onOpenChange(false);
+      toast.success(t("create.created", { name: pick(community.name) }));
+      navigate(`/community/${community.id}`);
+    } catch (error) {
+      setFailure(errorMessageKey(error));
+    } finally {
+      setBusy(false);
+    }
   };
 
   const showNameError = submitted && nameError;
@@ -90,7 +104,7 @@ export const CreateCommunityDialog = ({ open, onOpenChange, initialCategory }: C
           <DialogDescription>{t("create.description")}</DialogDescription>
         </DialogHeader>
 
-        <form id={formId} onSubmit={handleSubmit} noValidate className="space-y-5">
+        <form id={formId} onSubmit={(event) => void handleSubmit(event)} noValidate className="space-y-5">
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label htmlFor={`${formId}-name`}>{t("create.name")}</Label>
@@ -184,14 +198,20 @@ export const CreateCommunityDialog = ({ open, onOpenChange, initialCategory }: C
               ))}
             </div>
           </fieldset>
+
+          {failure && (
+            <p role="alert" className="rounded-lg bg-destructive/10 p-3 text-xs text-destructive">
+              {t(failure)}
+            </p>
+          )}
         </form>
 
         <DialogFooter>
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
             {t("common.cancel")}
           </Button>
-          <Button type="submit" form={formId}>
-            {t("create.submit")}
+          <Button type="submit" form={formId} disabled={busy} aria-busy={busy}>
+            {t(busy ? "create.creating" : "create.submit")}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -18,9 +18,11 @@ import {
 } from "@/components/ui/alert-dialog";
 import { MicTest } from "@/components/MicTest";
 import { usePreferences, type ThemePreference } from "@/context/PreferencesContext";
+import { toast } from "sonner";
+import { useAuth } from "@/context/AuthContext";
 import { useProfile } from "@/context/ProfileContext";
 import { useDialogs } from "@/context/DialogsContext";
-import { clearPersistentState, usePersistentState } from "@/hooks/use-persistent-state";
+import { usePersistentState } from "@/hooks/use-persistent-state";
 import { locales } from "@/lib/i18n";
 import type { TranslationKey } from "@/i18n/en";
 import { cn } from "@/lib/utils";
@@ -40,9 +42,6 @@ const settingsOptions: { icon: LucideIcon; label: TranslationKey; description: T
   { icon: Volume2, label: "settings.voice", description: "settings.voiceDesc", view: "voice" },
   { icon: Globe, label: "settings.language", description: "settings.languageDesc", view: "language" },
 ];
-
-// Everything this site keeps in localStorage; "Log out" clears it.
-const STORAGE_PREFIXES = ["settings.", "profile", "communities.", "activity.", "notifications."];
 
 const maskEmail = (email: string) => {
   const [user, domain] = email.split("@");
@@ -112,8 +111,9 @@ export const SettingsPanel = ({ onBack }: SettingsPanelProps) => {
   const {
     t, locale, setLocale, dir, theme, setTheme, compactMode, setCompactMode, animations, setAnimations, formatNumber,
   } = usePreferences();
+  const { signOut } = useAuth();
   const { profile, avatarUrl } = useProfile();
-  const { openEditProfile } = useDialogs();
+  const { openEditProfile, openSignIn, openChangePassword } = useDialogs();
   const [view, setView] = useState<SettingsView>("main");
 
   // Every preference below is saved in localStorage, so it survives a page reload.
@@ -133,10 +133,21 @@ export const SettingsPanel = ({ onBack }: SettingsPanelProps) => {
 
   const title = view === "main" ? t("settings.title") : t(settingsOptions.find((o) => o.view === view)!.label);
 
-  const logOut = () => {
-    clearPersistentState(STORAGE_PREFIXES);
-    window.location.reload();
+  // Preferences on this device stay; the account's data stays on the server.
+  const handleSignOut = () => {
+    signOut();
+    setView("main");
+    toast(t("auth.signedOut"));
   };
+
+  const signInButton = (
+    <button
+      onClick={() => openSignIn()}
+      className="w-full rounded-lg bg-primary/20 py-3 text-sm font-medium text-primary transition-colors hover:bg-primary/30"
+    >
+      {t("auth.signInOrUp")}
+    </button>
+  );
 
   return (
     <div className="absolute inset-0 overflow-y-auto p-6">
@@ -174,6 +185,7 @@ export const SettingsPanel = ({ onBack }: SettingsPanelProps) => {
           </div>
 
           <div className="mt-8 border-t border-border pt-6">
+            {profile ? (
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <button className="w-full rounded-lg bg-destructive/10 py-3 text-sm font-medium text-destructive transition-colors hover:bg-destructive/20">
@@ -187,26 +199,38 @@ export const SettingsPanel = ({ onBack }: SettingsPanelProps) => {
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
-                  <AlertDialogAction onClick={logOut} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                  <AlertDialogAction onClick={handleSignOut} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
                     {t("settings.logout")}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
+            ) : (
+              signInButton
+            )}
           </div>
         </>
       )}
 
-      {view === "account" && (
+      {view === "account" && !profile && (
+        <div className="animate-fade-in rounded-xl bg-secondary/50 p-4">
+          <p className="mb-4 text-sm text-muted-foreground">{t("settings.signInPrompt")}</p>
+          {signInButton}
+        </div>
+      )}
+
+      {view === "account" && profile && (
         <div className="animate-fade-in space-y-6">
           <div className="rounded-xl bg-secondary/50 p-4">
             <div className="mb-4 flex items-center gap-4">
               <img src={avatarUrl} alt="" className="h-16 w-16 rounded-full object-cover" />
               <div className="min-w-0">
                 <p className="truncate font-semibold">{profile.displayName}</p>
-                <p className="truncate text-sm text-muted-foreground" dir="ltr">
-                  @{profile.username}
-                </p>
+                {profile.username && (
+                  <p className="truncate text-sm text-muted-foreground" dir="ltr">
+                    @{profile.username}
+                  </p>
+                )}
               </div>
             </div>
             <button
@@ -222,7 +246,7 @@ export const SettingsPanel = ({ onBack }: SettingsPanelProps) => {
             <div className="rounded-lg bg-secondary/30 p-3">
               <p className="text-xs text-muted-foreground">{t("settings.username")}</p>
               <p className="text-sm font-medium" dir="ltr">
-                {profile.username}
+                {profile.username || <span className="text-muted-foreground">{t("common.notSet")}</span>}
               </p>
             </div>
             <PrivateValue label={t("settings.email")} value={profile.email} mask={maskEmail} />
@@ -238,14 +262,12 @@ export const SettingsPanel = ({ onBack }: SettingsPanelProps) => {
           <div className="space-y-3">
             <SectionTitle>{t("settings.security")}</SectionTitle>
             <button
-              disabled
-              className="flex w-full items-center gap-3 rounded-lg bg-secondary/30 p-3 opacity-60"
+              onClick={openChangePassword}
+              className="group flex w-full items-center gap-3 rounded-lg bg-secondary/30 p-3 transition-colors hover:bg-secondary/80"
             >
               <Lock className="h-4 w-4 text-muted-foreground" />
               <span className="text-sm">{t("settings.changePassword")}</span>
-              <span className="ms-auto rounded-full bg-secondary px-2 py-0.5 text-[10px] text-muted-foreground">
-                {t("common.comingSoon")}
-              </span>
+              <ChevronRight className="ms-auto h-4 w-4 text-muted-foreground transition-colors group-hover:text-foreground rtl:rotate-180" />
             </button>
           </div>
         </div>

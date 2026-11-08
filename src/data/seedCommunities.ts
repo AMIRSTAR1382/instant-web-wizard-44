@@ -3,6 +3,9 @@ import type { Community } from "./communities";
 /*
  * The built-in communities. This file has no image or icon imports (only a type import), so
  * vite.config.ts can read it at build time to write sitemap.xml.
+ *
+ * The server gets the same list from pocketbase/pb_migrations/1762600000_explore_schema.js
+ * (a test checks that the two match). The site shows this copy until the server answers.
  */
 
 const daysAgo = (days: number) => Date.UTC(2026, 10, 1) - days * 86_400_000;
@@ -207,6 +210,3 @@ export const seedCommunities: Community[] = [
     createdAt: daysAgo(15),
   },
 ];
-
-/** The communities a first-time visitor is already a member of (the icons in the left rail). */
-export const defaultJoinedIds = ["virtual-reality", "gaming-zone", "nft"];

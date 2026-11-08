@@ -73,6 +73,12 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    // The backend (`npm run backend`) answers on its own port; in development the site reaches
+    // it through the same address, exactly like on the server where PocketBase serves both.
+    proxy: {
+      "/api": { target: process.env.POCKETBASE_URL || "http://127.0.0.1:8090", changeOrigin: true },
+      "/_/": { target: process.env.POCKETBASE_URL || "http://127.0.0.1:8090", changeOrigin: true },
+    },
   },
   plugins: [react(), siteFiles(), mode === "development" && componentTagger()].filter(Boolean),
   resolve: {

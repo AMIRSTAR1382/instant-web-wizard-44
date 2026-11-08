@@ -65,14 +65,40 @@ export const infoPages: Record<InfoPageId, InfoPageContent> = {
       en: "What Explore saves, where it is kept, and how to delete it.",
       fa: "اکسپلور چه چیزهایی را ذخیره می‌کند، کجا نگه می‌دارد و چطور می‌شود پاکشان کرد.",
     },
-    updated: "2026-11-06",
+    updated: "2026-11-08",
     sections: [
       {
-        heading: { en: "What we save", fa: "چه چیزهایی ذخیره می‌شود" },
+        heading: { en: "Browsing without an account", fa: "گشتن بدون حساب کاربری" },
         paragraphs: [
           {
-            en: "There are no online accounts yet. Your profile, the communities you join or create, your notifications and your settings are saved only in your own browser (localStorage). They are not sent to our servers.",
-            fa: "هنوز حساب کاربری آنلاین وجود ندارد. پروفایل، جامعه‌هایی که عضوشان می‌شوی یا می‌سازی، اعلان‌ها و تنظیماتت فقط در مرورگر خودت (localStorage) ذخیره می‌شوند و به سرورهای ما فرستاده نمی‌شوند.",
+            en: "You can browse and search every community without an account. Nothing about you is saved on our server while you do.",
+            fa: "بدون حساب کاربری هم می‌توانی همه‌ی جامعه‌ها را ببینی و جستجو کنی. در این حالت چیزی درباره‌ی تو روی سرور ما ذخیره نمی‌شود.",
+          },
+        ],
+      },
+      {
+        heading: { en: "What your account saves on our server", fa: "حساب کاربری‌ات چه چیزهایی را روی سرور ما ذخیره می‌کند" },
+        paragraphs: [
+          {
+            en: "When you create an account we save your email address, your password (only as a secure hash, never as plain text) and your display name. If you add them, we also save your username, bio, phone number and profile photo.",
+            fa: "وقتی حساب می‌سازی، ایمیل، رمز عبور (فقط به‌صورت درهم‌سازی‌شده‌ی امن، هرگز خود رمز) و نام نمایشی‌ات ذخیره می‌شود. اگر نام کاربری، بیو، شماره تلفن یا عکس پروفایل اضافه کنی، آن‌ها هم ذخیره می‌شوند.",
+          },
+          {
+            en: "We also save the communities you create, which everyone can see, and the communities you join. Your email, phone number and the list of communities you joined are visible only to you.",
+            fa: "جامعه‌هایی که می‌سازی (که همه می‌بینندشان) و جامعه‌هایی که عضوشان می‌شوی هم ذخیره می‌شوند. ایمیل، شماره تلفن و فهرست عضویت‌هایت را فقط خودت می‌بینی.",
+          },
+          {
+            en: "The server is in Iran. We don't sell your information or share it with anyone, and we use it only to run your account.",
+            fa: "سرور در ایران است. اطلاعاتت را نمی‌فروشیم و به کسی نمی‌دهیم و فقط برای کار کردن حسابت از آن استفاده می‌کنیم.",
+          },
+        ],
+      },
+      {
+        heading: { en: "What stays in your browser", fa: "چه چیزهایی در مرورگرت می‌ماند" },
+        paragraphs: [
+          {
+            en: "Your settings (language, theme, sound), notifications and “Your activity” list are saved only in your own browser (localStorage), together with the key that keeps you signed in.",
+            fa: "تنظیماتت (زبان، تم، صدا)، اعلان‌ها و فهرست «فعالیت‌های تو» فقط در مرورگر خودت (localStorage) ذخیره می‌شوند؛ همراه با کلیدی که تو را وارد حسابت نگه می‌دارد.",
           },
         ],
       },
@@ -80,8 +106,12 @@ export const infoPages: Record<InfoPageId, InfoPageContent> = {
         heading: { en: "Deleting your data", fa: "پاک کردن اطلاعات" },
         paragraphs: [
           {
-            en: "Open Settings and choose “Log out” to delete everything saved on this device, or clear this site's data in your browser settings.",
-            fa: "در تنظیمات، «خروج از حساب» را بزن تا همه‌ی اطلاعات ذخیره‌شده در این دستگاه پاک شود؛ یا داده‌های این سایت را از تنظیمات مرورگرت پاک کن.",
+            en: "Delete a community you created from its page. To delete your whole account, with everything it saved, write to us through the Contact page from your account's email address.",
+            fa: "هر جامعه‌ای را که ساخته‌ای، از صفحه‌ی خودش حذف کن. برای حذف کامل حسابت و همه‌ی اطلاعاتش، با همان ایمیل حسابت از صفحه‌ی «تماس با ما» برایمان بنویس.",
+          },
+          {
+            en: "Signing out removes your session and activity list from this device; clearing this site's data in your browser removes the rest.",
+            fa: "خروج از حساب، نشست و فهرست فعالیت‌هایت را از این دستگاه پاک می‌کند؛ با پاک کردن داده‌های این سایت در مرورگر، بقیه هم پاک می‌شود.",
           },
         ],
       },
@@ -98,8 +128,8 @@ export const infoPages: Record<InfoPageId, InfoPageContent> = {
         heading: { en: "Other services", fa: "سرویس‌های دیگر" },
         paragraphs: [
           {
-            en: "The Persian font is loaded from Google Fonts, which receives your IP address like any web request. We don't use analytics, advertising or tracking cookies.",
-            fa: "فونت فارسی از Google Fonts بارگذاری می‌شود که مثل هر درخواست اینترنتی، آدرس IP تو را دریافت می‌کند. ما از ابزار آمارگیری، تبلیغات یا کوکی‌های ردیابی استفاده نمی‌کنیم.",
+            en: "Everything, the Persian font included, is served from our own server: no Google Fonts or other outside services. Our server keeps short technical logs (such as IP addresses) to protect accounts from abuse. We don't use analytics, advertising or tracking cookies.",
+            fa: "همه‌چیز، حتی فونت فارسی، از سرور خود ما بارگذاری می‌شود و از Google Fonts یا سرویس بیرونی دیگری استفاده نمی‌کنیم. سرور برای محافظت از حساب‌ها در برابر سوءاستفاده، گزارش‌های فنی کوتاه‌مدت (مثل آدرس IP) نگه می‌دارد. ما از ابزار آمارگیری، تبلیغات یا کوکی‌های ردیابی استفاده نمی‌کنیم.",
           },
         ],
       },
@@ -107,8 +137,8 @@ export const infoPages: Record<InfoPageId, InfoPageContent> = {
         heading: { en: "Changes", fa: "تغییرات" },
         paragraphs: [
           {
-            en: "When accounts are added, this page will be updated before anything about your data changes. Questions? Write to us through the Contact page.",
-            fa: "وقتی حساب کاربری اضافه شود، این صفحه پیش از هر تغییری در نحوه‌ی نگهداری اطلاعاتت به‌روز می‌شود. سؤالی داری؟ از صفحه‌ی «تماس با ما» برایمان بنویس.",
+            en: "This page will be updated before anything about how we keep your data changes; the date at the top shows the last change. Questions? Write to us through the Contact page.",
+            fa: "پیش از هر تغییری در نحوه‌ی نگهداری اطلاعاتت، این صفحه به‌روز می‌شود؛ تاریخ بالای صفحه زمان آخرین تغییر را نشان می‌دهد. سؤالی داری؟ از صفحه‌ی «تماس با ما» برایمان بنویس.",
           },
         ],
       },
@@ -121,7 +151,7 @@ export const infoPages: Record<InfoPageId, InfoPageContent> = {
       en: "The rules for using Explore and the communities on it.",
       fa: "قوانین استفاده از اکسپلور و جامعه‌های آن.",
     },
-    updated: "2026-11-06",
+    updated: "2026-11-08",
     sections: [
       {
         heading: { en: "Using Explore", fa: "استفاده از اکسپلور" },
@@ -151,11 +181,20 @@ export const infoPages: Record<InfoPageId, InfoPageContent> = {
         ],
       },
       {
+        heading: { en: "Your account", fa: "حساب کاربری تو" },
+        paragraphs: [
+          {
+            en: "Keep your password to yourself; you are responsible for what happens with your account. Communities you create must follow these terms, and we may remove ones that don't.",
+            fa: "رمز عبورت را به کسی نده؛ مسئولیت هر کاری که با حسابت انجام می‌شود با خودت است. جامعه‌هایی که می‌سازی باید با این قوانین جور باشند و ممکن است جامعه‌هایی را که رعایت نمی‌کنند حذف کنیم.",
+          },
+        ],
+      },
+      {
         heading: { en: "No guarantees", fa: "بدون ضمانت" },
         paragraphs: [
           {
-            en: "Explore is still being built and is provided as is. Features may change, and data saved in your browser can be lost if the browser's storage is cleared.",
-            fa: "اکسپلور هنوز در حال ساخت است و همان‌طور که هست ارائه می‌شود. ممکن است امکانات تغییر کنند و اگر حافظه‌ی مرورگر پاک شود، اطلاعات ذخیره‌شده از بین می‌رود.",
+            en: "Explore is still being built and is provided as is. Features may change, and the service may sometimes be unavailable.",
+            fa: "اکسپلور هنوز در حال ساخت است و همان‌طور که هست ارائه می‌شود. ممکن است امکانات تغییر کنند و سرویس گاهی در دسترس نباشد.",
           },
         ],
       },

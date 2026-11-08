@@ -1,7 +1,11 @@
+import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Check, Hash, Link2, LogOut, Plus, ShieldCheck, Trash2, Users } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useDialogs } from "@/context/DialogsContext";
+import { errorMessageKey } from "@/lib/backend/messages";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -34,12 +38,28 @@ const CommunityPage = () => {
   const { id = "" } = useParams();
   const navigate = useNavigate();
   const { t, pick, formatCompact, formatNumber, formatRelative } = usePreferences();
-  const { communities, getCommunity, isJoined, join, leave, deleteCommunity } = useCommunities();
+  const { communities, status, getCommunity, isJoined, join, leave, deleteCommunity } = useCommunities();
+  const { requireAccount } = useDialogs();
+  const [busy, setBusy] = useState<"joining" | "leaving" | "deleting" | null>(null);
   const community = getCommunity(id);
-  useDocumentTitle(community ? pick(community.name) : t("community.notFoundTitle"), {
+  const loading = !community && status === "loading";
+  useDocumentTitle(community ? pick(community.name) : loading ? t("app.loading") : t("community.notFoundTitle"), {
     description: community ? pick(community.description) : undefined,
     noIndex: !community,
   });
+
+  // A community created by someone else may not be in the built-in list: wait for the server.
+  if (loading) {
+    return (
+      <div className="space-y-6" role="status" aria-label={t("app.loading")}>
+        <Skeleton className="h-48 w-full rounded-2xl sm:h-64" />
+        <div className="grid gap-6 lg:grid-cols-3">
+          <Skeleton className="h-48 rounded-2xl lg:col-span-2" />
+          <Skeleton className="h-48 rounded-2xl" />
+        </div>
+      </div>
+    );
+  }
 
   if (!community) {
     return (
@@ -54,24 +74,47 @@ const CommunityPage = () => {
   }
 
   const name = pick(community.name);
+  // Inside a sentence the name is isolated, so a Persian name in English text (or the
+  // reverse) keeps the sentence's punctuation on the right side.
+  const nameInText = `\u2068${name}\u2069`;
   const category = getCategory(community.category);
   const joined = isJoined(community.id);
-  // Count the visitor in once they join.
-  const members = community.members + (joined && !community.createdByUser ? 1 : 0);
   const similar = communities
     .filter((item) => item.category === community.category && item.id !== community.id)
     .sort((a, b) => b.members - a.members)
     .slice(0, 3);
 
-  const toggleMembership = () => {
-    if (joined) {
-      leave(community.id);
-      toast(t("community.leftToast", { name }));
-    } else {
-      join(community.id);
-      toast.success(t("community.joinedToast", { name }));
+  const changeMembership = async (joining: boolean) => {
+    setBusy(joining ? "joining" : "leaving");
+    try {
+      if (joining) {
+        await join(community.id);
+        toast.success(t("community.joinedToast", { name: nameInText }));
+      } else {
+        await leave(community.id);
+        toast(t("community.leftToast", { name: nameInText }));
+      }
+    } catch (error) {
+      toast.error(t(errorMessageKey(error)));
+    } finally {
+      setBusy(null);
     }
   };
+
+  // Joining needs an account: a visitor signs in first, then joins.
+  const toggleMembership = () => {
+    if (joined) void changeMembership(false);
+    else requireAccount(t("auth.reasonJoin", { name: nameInText }), () => void changeMembership(true));
+  };
+
+  const membershipLabel =
+    busy === "joining"
+      ? t("community.joining")
+      : busy === "leaving"
+        ? t("community.leaving")
+        : joined
+          ? t("community.leave")
+          : t("community.join");
 
   const copyLink = async () => {
     try {
@@ -82,10 +125,16 @@ const CommunityPage = () => {
     }
   };
 
-  const handleDelete = () => {
-    deleteCommunity(community.id);
-    toast(t("community.deleted"));
-    navigate("/explore", { replace: true });
+  const handleDelete = async () => {
+    setBusy("deleting");
+    try {
+      await deleteCommunity(community.id);
+      toast(t("community.deleted"));
+      navigate("/explore", { replace: true });
+    } catch (error) {
+      toast.error(t(errorMessageKey(error)));
+      setBusy(null);
+    }
   };
 
   return (
@@ -106,19 +155,29 @@ const CommunityPage = () => {
           <span className="flex flex-wrap items-center gap-x-4 gap-y-1">
             <span className="inline-flex items-center gap-1.5">
               <Users className="h-4 w-4" aria-hidden="true" />
-              {t("community.members", { count: formatCompact(members) })}
+              {community.members === 1
+                ? t("community.oneMember")
+                : t("community.members", { count: formatCompact(community.members) })}
             </span>
-            <span className="inline-flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-green-500" aria-hidden="true" />
-              {t("community.online", { count: formatCompact(community.online) })}
-            </span>
+            {community.online > 0 && (
+              <span className="inline-flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-full bg-green-500" aria-hidden="true" />
+                {t("community.online", { count: formatCompact(community.online) })}
+              </span>
+            )}
           </span>
         }
         actions={
           <>
-            <Button onClick={toggleMembership} variant={joined ? "secondary" : "default"} aria-pressed={joined}>
+            <Button
+              onClick={toggleMembership}
+              variant={joined ? "secondary" : "default"}
+              aria-pressed={joined}
+              disabled={busy === "joining" || busy === "leaving"}
+              aria-busy={busy === "joining" || busy === "leaving"}
+            >
               {joined ? <LogOut className="rtl:rotate-180" /> : <Plus />}
-              {joined ? t("community.leave") : t("community.join")}
+              {membershipLabel}
             </Button>
             <Button variant="secondary" onClick={() => void copyLink()}>
               <Link2 />
@@ -127,19 +186,19 @@ const CommunityPage = () => {
             {community.createdByUser && (
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button variant="destructive">
+                  <Button variant="destructive" disabled={busy === "deleting"} aria-busy={busy === "deleting"}>
                     <Trash2 />
-                    {t("community.delete")}
+                    {busy === "deleting" ? t("community.deleting") : t("community.delete")}
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
                     <AlertDialogTitle>{t("community.deleteTitle")}</AlertDialogTitle>
-                    <AlertDialogDescription>{t("community.deleteText", { name })}</AlertDialogDescription>
+                    <AlertDialogDescription>{t("community.deleteText", { name: nameInText })}</AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                    <AlertDialogAction onClick={() => void handleDelete()} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
                       {t("community.delete")}
                     </AlertDialogAction>
                   </AlertDialogFooter>

@@ -9,4 +9,12 @@ if (window.location.hash.startsWith("#/")) {
   window.history.replaceState(null, "", window.location.hash.slice(1));
 }
 
+// Before accounts existed, the profile and memberships were kept in the browser. They live on
+// the server now, so drop the old copies.
+try {
+  ["profile", "communities.created", "communities.joined"].forEach((key) => window.localStorage.removeItem(key));
+} catch {
+  // Storage is blocked: there is nothing to clean up.
+}
+
 createRoot(document.getElementById("root")!).render(<App />);

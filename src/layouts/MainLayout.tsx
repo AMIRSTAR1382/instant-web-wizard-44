@@ -3,6 +3,8 @@ import { Outlet, useLocation } from "react-router-dom";
 import { Moon, Search, Sun, User } from "lucide-react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { useCommunities } from "@/context/CommunitiesContext";
 import { AppSidebar } from "@/components/AppSidebar";
 import { ServerIconsBar } from "@/components/ServerIconsBar";
 import { UserActivity } from "@/components/UserActivity";
@@ -21,6 +23,29 @@ const PageSkeleton = () => {
         <Skeleton className="aspect-[4/3] rounded-2xl" />
         <Skeleton className="aspect-[4/3] rounded-2xl" />
       </div>
+    </div>
+  );
+};
+
+/** Shown while the server can't be reached; the built-in communities stay browsable. */
+const ConnectionBanner = () => {
+  const { t } = usePreferences();
+  const { status, reload } = useCommunities();
+  const [retrying, setRetrying] = useState(false);
+  if (status !== "error") return null;
+
+  const retry = async () => {
+    setRetrying(true);
+    await reload();
+    setRetrying(false);
+  };
+
+  return (
+    <div role="alert" className="mb-4 flex flex-col gap-3 rounded-lg bg-destructive/10 p-3 text-xs text-destructive sm:flex-row sm:items-center">
+      <p className="flex-1">{t("communities.loadError")}</p>
+      <Button size="sm" variant="outline" onClick={() => void retry()} disabled={retrying} aria-busy={retrying} className="self-start sm:self-auto">
+        {t("common.tryAgain")}
+      </Button>
     </div>
   );
 };
@@ -141,6 +166,7 @@ export const MainLayout = () => {
                 tabIndex={-1}
                 className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden p-3 outline-none sm:p-4 md:p-6"
               >
+                <ConnectionBanner />
                 <ErrorBoundary key={pathname}>
                   <Suspense fallback={<PageSkeleton />}>
                     <Outlet />
