@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { Bell, BellOff, LogIn, LogOut, Pencil, PlusCircle, Settings, Trash2, UserCog, X, type LucideIcon } from "lucide-react";
+import {
+  Bell, BellOff, LogIn, LogOut, Pencil, PlusCircle, Settings, Trash2, UserCog, UserPlus, X, type LucideIcon,
+} from "lucide-react";
 import { SettingsPanel } from "./user-activity/SettingsPanel";
 import { NotificationsPanel } from "./user-activity/NotificationsPanel";
 import { usePreferences } from "@/context/PreferencesContext";
@@ -24,6 +26,10 @@ const newMembers = [
 ];
 const pageLoadedAt = Date.now();
 
+// The small rounded buttons under the profile picture.
+const pillButton =
+  "inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1.5 text-xs font-medium transition-colors hover:bg-primary/20";
+
 const activityDisplay: Record<ActivityType, { icon: LucideIcon; text: TranslationKey }> = {
   joined: { icon: LogIn, text: "activity.joined" },
   left: { icon: LogOut, text: "activity.left" },
@@ -40,7 +46,7 @@ interface UserActivityProps {
 export const UserActivity = ({ isOpen = false, onClose }: UserActivityProps) => {
   const { t, pick, formatRelative } = usePreferences();
   const { profile, avatarUrl } = useProfile();
-  const { openEditProfile } = useDialogs();
+  const { openEditProfile, openSignIn } = useDialogs();
   const { entries: activity, clear: clearActivity } = useActivityLog();
   const [activePanel, setActivePanel] = useState<Panel>("main");
   // Notifications live here (not inside NotificationsPanel) so the bell badge can read them too.
@@ -184,20 +190,38 @@ export const UserActivity = ({ isOpen = false, onClose }: UserActivityProps) => 
                 ))}
               </div>
             </div>
-            <h2 className="text-center text-xl font-bold">{profile.displayName}</h2>
-            <p className="text-center text-sm text-muted-foreground" dir="ltr">
-              @{profile.username}
-            </p>
-            {profile.bio && <p className="mt-2 text-center text-sm text-muted-foreground">{profile.bio}</p>}
-            <div className="mt-3 flex justify-center">
-              <button
-                onClick={openEditProfile}
-                className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1.5 text-xs font-medium transition-colors hover:bg-primary/20"
-              >
-                <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
-                {t("panel.editProfile")}
-              </button>
-            </div>
+            {profile ? (
+              <>
+                <h2 className="text-center text-xl font-bold">{profile.displayName}</h2>
+                {profile.username && (
+                  <p className="text-center text-sm text-muted-foreground" dir="ltr">
+                    @{profile.username}
+                  </p>
+                )}
+                {profile.bio && <p className="mt-2 text-center text-sm text-muted-foreground">{profile.bio}</p>}
+                <div className="mt-3 flex justify-center">
+                  <button onClick={openEditProfile} className={pillButton}>
+                    <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
+                    {t("panel.editProfile")}
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <h2 className="text-center text-xl font-bold">{t("panel.guestTitle")}</h2>
+                <p className="mt-2 text-center text-sm text-muted-foreground">{t("panel.guestText")}</p>
+                <div className="mt-3 flex flex-wrap justify-center gap-2">
+                  <button onClick={() => openSignIn()} className={pillButton}>
+                    <LogIn className="h-3.5 w-3.5 rtl:rotate-180" aria-hidden="true" />
+                    {t("auth.signIn")}
+                  </button>
+                  <button onClick={() => openSignIn({ mode: "signUp" })} className={pillButton}>
+                    <UserPlus className="h-3.5 w-3.5" aria-hidden="true" />
+                    {t("auth.signUp")}
+                  </button>
+                </div>
+              </>
+            )}
           </div>
 
           <section className="mb-6" aria-labelledby="panel-new-members">

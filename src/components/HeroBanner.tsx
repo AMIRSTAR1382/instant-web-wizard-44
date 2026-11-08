@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Compass, Plus } from "lucide-react";
-import heroBanner from "@/assets/hero-banner.jpg";
+import heroBanner from "@/assets/hero-banner.webp";
 import { Button } from "@/components/ui/button";
 import { usePreferences } from "@/context/PreferencesContext";
 import { useDialogs } from "@/context/DialogsContext";

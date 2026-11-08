@@ -13,17 +13,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import defaultAvatar from "@/assets/user-avatar.jpg";
+import defaultAvatar from "@/assets/user-avatar.webp";
 import { usePreferences } from "@/context/PreferencesContext";
 import { useProfile, type Profile } from "@/context/ProfileContext";
 import { logActivity } from "@/hooks/use-activity-log";
+import { errorMessageKey } from "@/lib/backend/messages";
+import { errorCode } from "@/lib/backend/types";
 import { resizeImageToDataUrl } from "@/lib/image";
 import type { TranslationKey } from "@/i18n/en";
 
 const USERNAME_PATTERN = /^[a-zA-Z0-9._]{3,20}$/;
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// Same rule as the server (pocketbase/pb_migrations).
+const PHONE_PATTERN = /^[0-9+() -]+$/;
 
-type Field = "displayName" | "username" | "email";
+type Field = "displayName" | "username" | "phone";
+
+const emptyProfile: Profile = { displayName: "", username: "", bio: "", email: "", phone: "", avatar: null };
 
 interface EditProfileDialogProps {
   open: boolean;
@@ -35,25 +40,39 @@ export const EditProfileDialog = ({ open, onOpenChange }: EditProfileDialogProps
   const { profile, updateProfile } = useProfile();
   const formId = useId();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [draft, setDraft] = useState<Profile>(profile);
+  const [draft, setDraft] = useState<Profile>(profile ?? emptyProfile);
   const [submitted, setSubmitted] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [failure, setFailure] = useState<TranslationKey | null>(null);
+  const [usernameTaken, setUsernameTaken] = useState(false);
 
   // Each time the dialog opens, start from what is saved.
   useEffect(() => {
     if (open) {
-      setDraft(profile);
+      setDraft(profile ?? emptyProfile);
       setSubmitted(false);
+      setBusy(false);
+      setFailure(null);
+      setUsernameTaken(false);
     }
     // Only when opening: re-syncing on every profile change would wipe what's being typed.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
+  // Signing out with the dialog open closes it.
+  useEffect(() => {
+    if (open && !profile) onOpenChange(false);
+  }, [open, profile, onOpenChange]);
+
   const set = <K extends keyof Profile>(key: K, value: Profile[K]) => setDraft((previous) => ({ ...previous, [key]: value }));
 
+  const username = draft.username.trim();
+  const phone = draft.phone.trim();
   const errors: Partial<Record<Field, TranslationKey>> = {};
   if (!draft.displayName.trim()) errors.displayName = "profile.errorName";
-  if (!USERNAME_PATTERN.test(draft.username.trim())) errors.username = "profile.errorUsername";
-  if (draft.email.trim() && !EMAIL_PATTERN.test(draft.email.trim())) errors.email = "profile.errorEmail";
+  if (username && !USERNAME_PATTERN.test(username)) errors.username = "profile.errorUsername";
+  else if (usernameTaken) errors.username = "error.usernameTaken";
+  if (phone && !PHONE_PATTERN.test(phone)) errors.phone = "profile.errorPhone";
 
   const fieldProps = (field: Field) => {
     const error = submitted ? errors[field] : undefined;
@@ -82,25 +101,38 @@ export const EditProfileDialog = ({ open, onOpenChange }: EditProfileDialogProps
     }
   };
 
-  const handleSubmit = (event: FormEvent) => {
+  const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
+    if (busy) return;
     setSubmitted(true);
-    const firstInvalid = (["displayName", "username", "email"] as Field[]).find((field) => errors[field]);
+    setFailure(null);
+    const firstInvalid = (["displayName", "username", "phone"] as Field[]).find((field) => errors[field]);
     if (firstInvalid) {
       document.getElementById(`${formId}-${firstInvalid}`)?.focus();
       return;
     }
-    updateProfile({
-      displayName: draft.displayName.trim(),
-      username: draft.username.trim(),
-      bio: draft.bio.trim(),
-      email: draft.email.trim(),
-      phone: draft.phone.trim(),
-      avatar: draft.avatar,
-    });
-    logActivity({ type: "profile" });
-    onOpenChange(false);
-    toast.success(t("profile.saved"));
+    setBusy(true);
+    try {
+      await updateProfile({
+        displayName: draft.displayName.trim(),
+        username,
+        bio: draft.bio.trim(),
+        phone,
+        avatar: draft.avatar,
+      });
+      logActivity({ type: "profile" });
+      onOpenChange(false);
+      toast.success(t("profile.saved"));
+    } catch (error) {
+      if (errorCode(error) === "username_taken") {
+        setUsernameTaken(true);
+        document.getElementById(`${formId}-username`)?.focus();
+      } else {
+        setFailure(errorMessageKey(error));
+      }
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -111,7 +143,7 @@ export const EditProfileDialog = ({ open, onOpenChange }: EditProfileDialogProps
           <DialogDescription>{t("profile.description")}</DialogDescription>
         </DialogHeader>
 
-        <form id={formId} onSubmit={handleSubmit} noValidate className="space-y-4">
+        <form id={formId} onSubmit={(event) => void handleSubmit(event)} noValidate className="space-y-4">
           <div className="flex items-center gap-4">
             <img
               src={draft.avatar ?? defaultAvatar}
@@ -156,11 +188,16 @@ export const EditProfileDialog = ({ open, onOpenChange }: EditProfileDialogProps
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor={`${formId}-username`}>{t("profile.username")}</Label>
+            <Label htmlFor={`${formId}-username`}>
+              {t("profile.username")} <span className="text-xs font-normal text-muted-foreground">({t("common.optional")})</span>
+            </Label>
             <Input
               {...fieldProps("username")}
               value={draft.username}
-              onChange={(event) => set("username", event.target.value)}
+              onChange={(event) => {
+                set("username", event.target.value);
+                setUsernameTaken(false);
+              }}
               maxLength={20}
               autoComplete="username"
               dir="ltr"
@@ -182,41 +219,50 @@ export const EditProfileDialog = ({ open, onOpenChange }: EditProfileDialogProps
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor={`${formId}-email`}>
-                {t("profile.email")} <span className="text-xs font-normal text-muted-foreground">({t("common.optional")})</span>
-              </Label>
+              <Label htmlFor={`${formId}-email`}>{t("profile.email")}</Label>
               <Input
-                {...fieldProps("email")}
+                id={`${formId}-email`}
                 type="email"
                 value={draft.email}
-                onChange={(event) => set("email", event.target.value)}
-                autoComplete="email"
+                readOnly
+                aria-describedby={`${formId}-email-note`}
                 dir="ltr"
+                className="text-muted-foreground"
               />
-              {fieldError("email")}
+              <p id={`${formId}-email-note`} className="text-xs text-muted-foreground">
+                {t("profile.emailNote")}
+              </p>
             </div>
             <div className="space-y-2">
               <Label htmlFor={`${formId}-phone`}>
                 {t("profile.phone")} <span className="text-xs font-normal text-muted-foreground">({t("common.optional")})</span>
               </Label>
               <Input
-                id={`${formId}-phone`}
+                {...fieldProps("phone")}
                 type="tel"
                 value={draft.phone}
                 onChange={(event) => set("phone", event.target.value)}
+                maxLength={20}
                 autoComplete="tel"
                 dir="ltr"
               />
+              {fieldError("phone")}
             </div>
           </div>
+
+          {failure && (
+            <p role="alert" className="rounded-lg bg-destructive/10 p-3 text-xs text-destructive">
+              {t(failure)}
+            </p>
+          )}
         </form>
 
         <DialogFooter>
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
             {t("common.cancel")}
           </Button>
-          <Button type="submit" form={formId}>
-            {t("common.save")}
+          <Button type="submit" form={formId} disabled={busy} aria-busy={busy}>
+            {t(busy ? "common.saving" : "common.save")}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -12,6 +12,7 @@ import {
 import { usePreferences } from "@/context/PreferencesContext";
 import { useProfile } from "@/context/ProfileContext";
 import { useCommunities } from "@/context/CommunitiesContext";
+import { useDialogs } from "@/context/DialogsContext";
 import { categories, getCommunityImage } from "@/data/communities";
 import { usePersistentState } from "@/hooks/use-persistent-state";
 import { cn } from "@/lib/utils";
@@ -32,6 +33,7 @@ export const AppSidebar = () => {
   const { t, pick, dir } = usePreferences();
   const { profile, avatarUrl } = useProfile();
   const { joinedCommunities } = useCommunities();
+  const { openSignIn } = useDialogs();
   const [showOnlineStatus] = usePersistentState("settings.showOnlineStatus", true);
   const [participantsOpen, setParticipantsOpen] = useState(true);
   const [voiceActive, setVoiceActive] = useState(true);
@@ -164,19 +166,36 @@ export const AppSidebar = () => {
           <div className="flex items-center gap-3">
             <div className="relative shrink-0">
               <img src={avatarUrl} alt="" className="h-10 w-10 rounded-full object-cover ring-2 ring-primary/50" />
-              {showOnlineStatus && (
+              {profile && showOnlineStatus && (
                 <div
                   className="absolute -bottom-0.5 -end-0.5 h-3.5 w-3.5 rounded-full border-2 border-sidebar-background bg-green-500"
                   title={t("voice.online")}
                 />
               )}
             </div>
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-medium text-foreground">{profile.displayName}</p>
-              <p className="truncate text-xs text-muted-foreground" dir="ltr">
-                @{profile.username}
-              </p>
-            </div>
+            {profile ? (
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium text-foreground">{profile.displayName}</p>
+                {profile.username && (
+                  <p className="truncate text-xs text-muted-foreground" dir="ltr">
+                    @{profile.username}
+                  </p>
+                )}
+              </div>
+            ) : (
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium text-foreground">{t("panel.guest")}</p>
+                <button
+                  onClick={() => {
+                    closeOnMobile();
+                    openSignIn();
+                  }}
+                  className="truncate text-xs font-medium text-primary underline-offset-4 hover:underline"
+                >
+                  {t("auth.signInOrUp")}
+                </button>
+              </div>
+            )}
             <div className="flex items-center gap-1">
               <button
                 onClick={() => setVoiceActive(!voiceActive)}

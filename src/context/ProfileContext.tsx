@@ -1,49 +1,64 @@
 import { createContext, useCallback, useContext, useMemo, type ReactNode } from "react";
-import defaultAvatar from "@/assets/user-avatar.jpg";
-import { usePersistentState } from "@/hooks/use-persistent-state";
+import defaultAvatar from "@/assets/user-avatar.webp";
+import { useAuth } from "@/context/AuthContext";
+import type { ProfileChanges } from "@/lib/backend/types";
 
 export interface Profile {
   displayName: string;
+  /** Empty until they choose one. */
   username: string;
   bio: string;
+  /** The account's email (shown, not changed, from the profile). */
   email: string;
   phone: string;
-  /** A small JPEG data URL chosen by the visitor, or null for the default picture. */
+  /** Address of their picture (or a data URL just picked), or null for the default picture. */
   avatar: string | null;
 }
 
-const defaultProfile: Profile = {
-  displayName: "Md Amir Khan",
-  username: "aamiiillliirrr",
-  bio: "",
-  email: "",
-  phone: "",
-  avatar: null,
-};
-
 interface ProfileValue {
-  profile: Profile;
-  /** The picture to show: the visitor's own, or the default one. */
+  /** The signed-in person's profile; null for a visitor without an account. */
+  profile: Profile | null;
+  /** The picture to show: theirs, or the default one. */
   avatarUrl: string;
-  updateProfile: (changes: Partial<Profile>) => void;
+  /** Saves on the server. Rejects with a BackendError (e.g. "username_taken") when it can't. */
+  updateProfile: (changes: Partial<Profile>) => Promise<void>;
 }
 
 const ProfileContext = createContext<ProfileValue | null>(null);
 
-/** The visitor's profile, saved in this browser until real accounts exist. */
+/** The signed-in person's profile, which lives on their account on the server. */
 export const ProfileProvider = ({ children }: { children: ReactNode }) => {
-  const [stored, setStored] = usePersistentState<Partial<Profile>>("profile", defaultProfile);
+  const { account, updateAccount } = useAuth();
 
-  // Fill in fields that older saved profiles don't have yet.
-  const profile = useMemo<Profile>(() => ({ ...defaultProfile, ...stored }), [stored]);
+  const profile = useMemo<Profile | null>(
+    () =>
+      account && {
+        displayName: account.displayName,
+        username: account.username,
+        bio: account.bio,
+        email: account.email,
+        phone: account.phone,
+        avatar: account.avatarUrl,
+      },
+    [account],
+  );
 
   const updateProfile = useCallback(
-    (changes: Partial<Profile>) => setStored((previous) => ({ ...defaultProfile, ...previous, ...changes })),
-    [setStored],
+    async (changes: Partial<Profile>) => {
+      const update: ProfileChanges = {};
+      if (changes.displayName !== undefined) update.displayName = changes.displayName;
+      if (changes.username !== undefined) update.username = changes.username;
+      if (changes.bio !== undefined) update.bio = changes.bio;
+      if (changes.phone !== undefined) update.phone = changes.phone;
+      // Only send the picture when it changed: a new one is a data URL, null removes it.
+      if (changes.avatar !== undefined && changes.avatar !== profile?.avatar) update.avatar = changes.avatar;
+      await updateAccount(update);
+    },
+    [profile?.avatar, updateAccount],
   );
 
   const value = useMemo<ProfileValue>(
-    () => ({ profile, avatarUrl: profile.avatar ?? defaultAvatar, updateProfile }),
+    () => ({ profile, avatarUrl: profile?.avatar ?? defaultAvatar, updateProfile }),
     [profile, updateProfile],
   );
 

@@ -1,9 +1,9 @@
 import { Code, Cpu, Film, Gamepad2, Music, Palette, type LucideIcon } from "lucide-react";
-import heroBanner from "@/assets/hero-banner.jpg";
-import gamingZone from "@/assets/gaming-zone.jpg";
-import vrCommunity from "@/assets/vr-community.jpg";
-import art3d from "@/assets/3d-art.jpg";
-import nftCommunity from "@/assets/nft-community.jpg";
+import heroBanner from "@/assets/hero-banner.webp";
+import gamingZone from "@/assets/gaming-zone.webp";
+import vrCommunity from "@/assets/vr-community.webp";
+import art3d from "@/assets/3d-art.webp";
+import nftCommunity from "@/assets/nft-community.webp";
 import type { LocalizedText } from "@/lib/i18n";
 
 /*
@@ -98,11 +98,13 @@ export interface Community {
   featured?: boolean;
   /** Milliseconds since 1970; used for "Newest" sorting. */
   createdAt: number;
-  /** Set on communities the visitor created in this browser. */
+  /** The account that created it; built-in communities have none. */
+  ownerId?: string;
+  /** True when the signed-in person created it (so they may delete it). */
   createdByUser?: boolean;
 }
 
-export { seedCommunities, defaultJoinedIds } from "./seedCommunities";
+export { seedCommunities } from "./seedCommunities";
 
 /** Lower-case text with Arabic letter variants mapped to Persian, so "علي" finds "علی". */
 export function normalizeForSearch(text: string) {

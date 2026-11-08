@@ -1,0 +1,9 @@
+# Not needed to build the image (the Dockerfile installs and builds everything itself).
+node_modules
+dist
+.git
+.claude
+.env
+.env.*
+!.env.example
+*.log

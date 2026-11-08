@@ -118,7 +118,7 @@ All colors MUST be HSL.
     outline-offset: 2px;
   }
 
-  /* Persian: Vazirmatn (loaded in index.html), falling back to fonts every system has. */
+  /* Persian: Vazirmatn (bundled from the vazirmatn package in main.tsx), falling back to fonts every system has. */
   html[lang="fa"] body {
     font-family: "Vazirmatn", Tahoma, ui-sans-serif, system-ui, sans-serif;
   }

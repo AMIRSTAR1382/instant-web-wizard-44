@@ -48,7 +48,9 @@ export const CommunityCard = ({ community, className }: CommunityCardProps) => {
         <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{pick(community.description)}</p>
         <p className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
           <Users className="h-3.5 w-3.5" aria-hidden="true" />
-          {t("community.members", { count: formatCompact(community.members) })}
+          {community.members === 1
+                ? t("community.oneMember")
+                : t("community.members", { count: formatCompact(community.members) })}
         </p>
       </div>
     </Link>
